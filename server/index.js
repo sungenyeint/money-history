@@ -16,8 +16,10 @@ app.get('/api', (req, res) => {
   res.send({ message: 'Hello from backend!' });
 });
 
-const incomeRoutes = require('./routes/incomeCategoryRoutes');
-app.use('/api/income-categories', incomeRoutes);
+const incomeCategoryRoutes = require('./routes/incomeCategoryRoutes');
+const incomeRoutes = require('./routes/incomeRoutes');
+app.use('/api/income-categories', incomeCategoryRoutes);
+app.use('/api/incomes', incomeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
