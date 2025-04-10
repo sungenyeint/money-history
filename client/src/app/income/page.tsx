@@ -1,13 +1,77 @@
+'use client';
+import axios from "axios";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { FiEdit } from "react-icons/fi";
+import { HiChevronLeft } from "react-icons/hi";
+import { MdDirectionsBus, MdSportsHandball, MdCleaningServices } from "react-icons/md";
 
 export default function Income() {
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [amount, setAmount] = useState('');
+    const [note, setNote] = useState('');
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [loading, setLoading] = useState(false); // Loading state for submission
+    const [error, setError] = useState(''); // Error message for validation
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/categories")
+            .then(response => setCategories(response.data))
+            .catch(error => console.error("Error fetching categories:", error));
+    }, []);
+
+    const handleSubmit = async () => {
+        if (!selectedCategory || !amount || !date) {
+            setError("Please fill in all required fields.");
+            return;
+        }
+
+        setLoading(true); // Start loading
+        setError(''); // Clear previous errors
+
+        const transactionData = {
+            category: selectedCategory,
+            amount: parseFloat(amount),
+            note,
+            date,
+            type: "income"
+        };
+
+        try {
+            await axios.post("http://localhost:5000/api/transactions", transactionData);
+            // Show success notification
+            // alert("Transaction added successfully!");
+            // Reset form
+            setSelectedCategory(null);
+            setAmount('');
+            setNote('');
+            setDate(new Date().toISOString().split('T')[0]);
+            // Redirect to home page
+            window.location.href = "/";
+        } catch (error) {
+            console.error("Error posting transaction:", error);
+            setError("Failed to add transaction.");
+            // alert("Failed to add transaction.");
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white flex flex-col items-center">
             {/* Header */}
-            <div className="w-full bg-cyan-400 text-white text-center py-4 relative">
-                <Link href="/" className="absolute left-4 top-4 text-white text-xl">←</Link>
+            <div className="w-full bg-blue-500 text-white text-center py-4 sticky top-0 z-10">
+                <Link href="/" className="absolute left-4 top-3 text-white text-xl"><HiChevronLeft className="text-4xl" /></Link>
                 <h1 className="text-lg font-semibold">၀င်ငွေရေးသွင်း</h1>
             </div>
+
+            {/* Error Message */}
+            {error && (
+                <div className="w-full px-6 mt-4">
+                    <p className="text-red-500 text-sm">{error}</p>
+                </div>
+            )}
 
             {/* Category label */}
             <div className="mt-4 w-full px-6 text-gray-700 font-medium text-base">
@@ -16,29 +80,37 @@ export default function Income() {
 
             {/* Categories grid */}
             <div className="mt-4 px-6 w-full">
-                <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
-                    {[
-                        { label: 'ဖုန်းဘေလ်', color: 'bg-green-500', icon: '📱' },
-                        { label: 'ကားခ', color: 'bg-yellow-500', icon: '🚌' },
-                        { label: 'အစားအစာ', color: 'bg-orange-500', icon: '🍛' },
-                        { label: 'အင်တာနက်', color: 'bg-green-500', icon: '🌐' },
-                        { label: 'သန့်ရှင်း', color: 'bg-orange-300', icon: '🧼' },
-                        { label: 'အားကစား', color: 'bg-gray-600', icon: '🏋️' },
-                        { label: 'ဖုန်းဘေလ်', color: 'bg-green-500', icon: '📱' },
-                        { label: 'ကားခ', color: 'bg-yellow-500', icon: '🚌' },
-                        { label: 'အစားအစာ', color: 'bg-orange-500', icon: '🍛' },
-                        { label: 'အင်တာနက်', color: 'bg-green-500', icon: '🌐' },
-                        { label: 'သန့်ရှင်း', color: 'bg-orange-300', icon: '🧼' },
-                        { label: 'အားကစား', color: 'bg-gray-600', icon: '🏋️' },
-                    ].map((item, index) => (
-                        <div key={index} className="flex flex-col items-center text-sm text-gray-700">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl ${item.color}`}>
-                                {item.icon}
-                            </div>
-                            <span className="mt-2 text-center">{item.label}</span>
-                        </div>
-                    ))}
-                </div>
+                {!selectedCategory ? (
+                    <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
+                        {categories
+                            .filter(item => item.type === "income")
+                            .map((item, index) => (
+                                <div
+                                    key={index}
+                                    className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${selectedCategory === item._id ? 'border-2 border-blue-500' : ''}`}
+                                    onClick={() => setSelectedCategory(item._id)}
+                                >
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl ${index % 2 === 0 ? 'bg-green-500' : 'bg-yellow-500'}`}>
+                                        <MdDirectionsBus />
+                                    </div>
+                                    <span className="mt-2 text-center">{item.name}</span>
+                                </div>
+                            ))
+                        }
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
+                        <span className="text-gray-700 font-medium">
+                            {categories.find(item => item._id === selectedCategory)?.name}
+                        </span>
+                        <button
+                            onClick={() => setSelectedCategory(null)}
+                            className="text-gray font-semibold"
+                        >
+                            <FiEdit className="inline-block mr-1" />
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Amount Section */}
@@ -47,18 +119,24 @@ export default function Income() {
                 <input
                     type="number"
                     placeholder="Enter amount"
-                    className="w-full mt-2 p-2 rounded-md bg-cyan-50 text-cyan-700 text-center"
+                    required
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className={`w-full mt-2 p-2 rounded-md bg-blue-50 text-gray ${!amount && error ? 'border border-red-500' : ''}`}
                 />
             </div>
 
             {/* Notes Section */}
             <div className="w-full px-6 mt-6">
-                <label className="text-gray-700 font-medium">မှတ်စု</label>
+                <label className="text-gray font-medium">မှတ်စု</label>
                 <textarea
                     placeholder="Enter Notes"
                     rows={4}
-                    className="w-full mt-2 p-2 rounded-md bg-cyan-50 text-cyan-700 text-center">
-                </textarea>
+                    maxLength={200}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                ></textarea>
             </div>
 
             {/* Date Picker */}
@@ -66,34 +144,33 @@ export default function Income() {
                 <label className="text-gray-700 font-medium">နေ့ ရက်</label>
                 <input
                     type="date"
-                    className="w-full mt-2 p-2 rounded-md bg-cyan-50 text-cyan-700 text-center"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className={`w-full mt-2 p-2 rounded-md bg-blue-50 text-gray ${!date && error ? 'border border-red-500' : ''}`}
                 />
             </div>
 
             {/* Action Buttons */}
             <div className="mt-6 w-full px-6 space-y-3">
-                <button className="w-full bg-cyan-400 text-white py-3 rounded-full font-semibold">
-                    အတည်ပြုမည်
+                <button
+                    disabled={!selectedCategory || !amount || !date || loading}
+                    onClick={handleSubmit}
+                    className={`w-full bg-blue-500 text-white py-3 rounded-full font-semibold ${(!selectedCategory || !amount || !date || loading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    {loading ? "Submitting..." : "အတည်ပြုမည်"}
                 </button>
-                <button className="w-full border border-cyan-400 text-cyan-400 py-3 rounded-full font-semibold">
+                <button
+                    onClick={() => {
+                        setSelectedCategory(null);
+                        setAmount('');
+                        setNote('');
+                        setDate(new Date().toISOString().split('T')[0]);
+                        setError('');
+                    }}
+                    className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold"
+                >
                     ပယ်ဖျက်မည်
                 </button>
-            </div>
-
-            {/* Footer Navigation */}
-            <div className="mt-auto w-full border-t flex justify-around items-center py-3">
-                <div className="flex flex-col items-center text-cyan-500">
-                    <span className="text-xl">🏠</span>
-                    <span className="text-xs">Home</span>
-                </div>
-                <div className="flex flex-col items-center text-gray-600">
-                    <span className="text-xl">💰</span>
-                    <span className="text-xs">Budget</span>
-                </div>
-                <div className="flex flex-col items-center text-gray-600">
-                    <span className="text-xl">⋯</span>
-                    <span className="text-xs">More</span>
-                </div>
             </div>
         </div>
     );
