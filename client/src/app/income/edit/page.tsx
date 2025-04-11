@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { HiChevronLeft } from "react-icons/hi";
-import { MdDirectionsBus } from "react-icons/md";
-import { FiDelete, FiEdit } from "react-icons/fi";
-import { FcDeleteDatabase, FcDeleteRow } from "react-icons/fc";
+import { MdDeleteForever, MdDirectionsBus } from "react-icons/md";
+import { FiEdit } from "react-icons/fi";
 
 export default function EditIncome() {
     const searchParams = useSearchParams();
@@ -93,12 +92,12 @@ export default function EditIncome() {
                 <Link href="/" className="absolute left-4 top-3 text-white text-xl">
                     <HiChevronLeft className="text-4xl" />
                 </Link>
-                <h1 className="text-lg font-semibold">Edit Income</h1>
+                <h1 className="text-lg font-semibold">ပြင်ဆင်ရန်</h1>
                 <button
                     onClick={handleDelete}
                     className="absolute right-4 top-3 text-white text-xl"
                 >
-                    <FcDeleteDatabase className="text-4xl" />
+                    <MdDeleteForever className="text-4xl" />
                 </button>
             </div>
 
@@ -111,7 +110,7 @@ export default function EditIncome() {
 
             {/* Category Selection */}
             <div className="mt-4 w-full px-6 text-gray-700 font-medium text-base">
-                အမျိုးအစားရွေးပါ
+                အမျိုးအစားရွေးရန်
             </div>
             <div className="mt-4 px-6 w-full">
             {!selectedCategory ? (
@@ -161,7 +160,7 @@ export default function EditIncome() {
 
             {/* Note Input */}
             <div className="w-full px-6 mt-6">
-                <label className="text-gray-700 font-medium">မှတ်တမ်း</label>
+                <label className="text-gray-700 font-medium">မှတ်စု</label>
                 <textarea
                     placeholder="Enter note"
                     rows={4}
@@ -173,7 +172,7 @@ export default function EditIncome() {
 
             {/* Date Input */}
             <div className="w-full px-6 mt-6">
-                <label className="text-gray-700 font-medium">Date</label>
+                <label className="text-gray-700 font-medium">နေ့ ရက်</label>
                 <input
                     type="date"
                     value={date}
@@ -191,13 +190,13 @@ export default function EditIncome() {
                         loading ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                 >
-                    {loading ? "Updating..." : "Update Transaction"}
+                    {loading ? "လုပ်ဆောင်ဆဲ..." : "အတည်ပြုမည်"}
                 </button>
                 <Link
                     href="/"
                     className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold text-center block"
                 >
-                    Cancel
+                    ပယ်ဖျက်မည်
                 </Link>
             </div>
         </div>

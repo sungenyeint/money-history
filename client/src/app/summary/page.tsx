@@ -4,6 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { HiChevronLeft, HiDocumentDownload } from "react-icons/hi";
 import { FaDownload, FaFilter } from "react-icons/fa";
+import registerMyanmarFont from "../NotoSansMyanmar-Regular.js"; // Adjust the path as necessary
 
 export default function SummaryPage() {
     const [transactions, setTransactions] = useState([]);
@@ -42,6 +43,67 @@ export default function SummaryPage() {
     const totalAmount = filteredTransactions.reduce((sum, transaction) => {
         return sum + (transaction.type === "income" ? transaction.amount : -transaction.amount);
     }, 0);
+
+    const handleDownloadPDF = async () => {
+        const jsPDF = (await import("jspdf")).default;
+
+        // Register the Myanmar font
+        registerMyanmarFont();
+
+        // Create document
+        const doc = new jsPDF();
+
+        doc.setFont("NotoSansMyanmar", "normal");
+        doc.setFontSize(14);
+        doc.text(`${new Date(filterYear, filterMonth - 1).toLocaleDateString("my-MM", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        })} for transactions Summary`, 10, 15);
+        doc.setFontSize(10);
+        doc.text(`Download Date: ${new Date().toLocaleDateString()}`, 10, 25);
+
+        // Table Header
+        let y = 40;
+        doc.setFontSize(11);
+        doc.text("Date", 10, y);
+        doc.text("type", 40, y);
+        doc.text("Category", 80, y);
+        doc.text("Amount", 150, y, { align: "right" });
+
+        y += 6;
+        doc.setLineWidth(0.1);
+        doc.line(10, y, 200, y); // underline
+
+        y += 6;
+
+        // Transactions Table
+        filteredTransactions.forEach((tx) => {
+            if (y > 280) {
+                doc.addPage();
+                y = 20;
+            }
+
+            doc.text(new Date(tx.date).toLocaleDateString(), 10, y);
+            doc.text(tx.type === "income" ? "Income" : "Expense", 40, y);
+            doc.text(tx.category?.name || "အမည်မသိ", 80, y);
+
+            doc.text(
+                `${tx.type === "income" ? "+ " : "- "}${Number(tx.amount).toLocaleString()}`,
+                150,
+                y,
+                { align: "right" }
+            );
+            y += 8;
+        });
+
+        doc.line(10, y, 200, y); // underline
+        y += 6;
+        doc.text(`Total Amount: ${totalAmount >= 0 ? "+ " : "- "}${Math.abs(totalAmount).toLocaleString()} MMK`, 150, y, { align: "right" });
+
+        // Save PDF
+        doc.save(`transactions_${filterYear}_${filterMonth}.pdf`);
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center">
@@ -143,57 +205,7 @@ export default function SummaryPage() {
                     <FaDownload
                       title="Download PDF"
                       className="text-xl text-blue-500 cursor-pointer"
-                      onClick={async () => {
-                        const jsPDF = (await import("jspdf")).default;
-                        const doc = new jsPDF("p", "pt", "a4");
-
-                        // Header
-                        doc.setFontSize(14);
-                        doc.text("Transactions Summary", 10, 15);
-                        doc.setFontSize(10);
-                        doc.text(`Month: ${new Date(filterYear, filterMonth - 1).toLocaleString("default", { month: "long" })}`, 10, 25);
-                        doc.text(`Year: ${filterYear}`, 10, 32);
-
-                        // Table Header
-                        let y = 40;
-                        doc.setFontSize(11);
-                        doc.text("Date", 10, y);
-                        doc.text("type", 40, y);
-                        doc.text("Category", 80, y);
-                        doc.text("Amount", 150, y, { align: "right" });
-
-                        y += 6;
-                        doc.setLineWidth(0.1);
-                        doc.line(10, y, 200, y); // underline
-
-                        y += 6;
-
-                        // Transactions Table
-                        filteredTransactions.forEach((tx) => {
-                          if (y > 280) {
-                            doc.addPage();
-                            y = 20;
-                          }
-
-                          doc.text(new Date(tx.date).toLocaleDateString(), 10, y);
-                          doc.text(tx.type === "income" ? "Income" : "Expense", 40, y);
-                          doc.text(tx.category?.name || "အမည်မသိ", 80, y); // Myanmar category name
-                          doc.text(
-                            `${tx.type === "income" ? "+ " : "- "}${Number(tx.amount).toLocaleString()}`,
-                            150,
-                            y,
-                            { align: "right" }
-                          );
-                          y += 8;
-                        });
-
-                        doc.line(10, y, 200, y); // underline
-                        y += 6;
-                        doc.text(`Total Amount: ${totalAmount >= 0 ? "+ " : "- "}${Math.abs(totalAmount).toLocaleString()} MMK`, 150, y, { align: "right" });
-
-                        // Save PDF
-                        doc.save(`transactions_${filterYear}_${filterMonth}.pdf`);
-                      }}
+                      onClick={handleDownloadPDF}
                     />
                 </div>
                 {filteredTransactions.length === 0 ? (

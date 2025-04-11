@@ -1,25 +1,47 @@
-'use client';
+"use client";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { FiEdit } from "react-icons/fi";
 import { HiChevronLeft } from "react-icons/hi";
-import { MdDirectionsBus } from "react-icons/md";
+import { MdDeleteForever, MdDirectionsBus } from "react-icons/md";
+import { FiEdit } from "react-icons/fi";
 
-export default function Income() {
+export default function EditExpense() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id"); // Get the "id" from the query string
+
+    const [transaction, setTransaction] = useState(null);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [amount, setAmount] = useState('');
     const [note, setNote] = useState('');
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [loading, setLoading] = useState(false); // Loading state for submission
-    const [error, setError] = useState(''); // Error message for validation
+    const [date, setDate] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/categories")
-            .then(response => setCategories(response.data))
-            .catch(error => console.error("Error fetching categories:", error));
-    }, []);
+        // Fetch transaction details
+        if (id) {
+            axios
+                .get(`http://localhost:5000/api/transactions/${id}`)
+                .then((response) => {
+                    const data = response.data;
+                    setTransaction(data);
+                    setSelectedCategory(data.category?._id || null);
+                    setAmount(data.amount || '');
+                    setNote(data.note || '');
+                    setDate(new Date(data.date).toISOString().split('T')[0]);
+                })
+                .catch((error) => console.error("Error fetching transaction:", error));
+        }
+
+        // Fetch categories
+        axios
+            .get("http://localhost:5000/api/categories")
+            .then((response) => setCategories(response.data))
+            .catch((error) => console.error("Error fetching categories:", error));
+    }, [id]);
 
     const handleSubmit = async () => {
         if (!selectedCategory || !amount || !date) {
@@ -27,43 +49,56 @@ export default function Income() {
             return;
         }
 
-        setLoading(true); // Start loading
-        setError(''); // Clear previous errors
+        setLoading(true);
+        setError('');
 
-        const transactionData = {
+        const updatedTransaction = {
             category: selectedCategory,
             amount: parseFloat(amount),
             note,
             date,
-            type: "income"
+            type: "expense",
         };
 
         try {
-            await axios.post("http://localhost:5000/api/transactions", transactionData);
-            // Show success notification
-            // alert("Transaction added successfully!");
-            // Reset form
-            setSelectedCategory(null);
-            setAmount('');
-            setNote('');
-            setDate(new Date().toISOString().split('T')[0]);
-            // Redirect to home page
+            await axios.put(`http://localhost:5000/api/transactions/${id}`, updatedTransaction);
+            // alert("Transaction updated successfully!");
             window.location.href = "/";
         } catch (error) {
-            console.error("Error posting transaction:", error);
-            setError("Failed to add transaction.");
-            // alert("Failed to add transaction.");
+            console.error("Error updating transaction:", error);
+            setError("ailed to update transaction.");
+            // alert("Failed to update transaction.");
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
+
+    const handleDelete = async () => {
+        if (confirm("Are you sure you want to delete this transaction?")) {
+            try {
+                await axios.delete(`http://localhost:5000/api/transactions/${id}`);
+                window.location.href = "/";
+            } catch (error) {
+                console.error("Error deleting transaction:", error);
+                setError("Error deleting transaction:");
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center">
             {/* Header */}
             <div className="w-full bg-blue-500 text-white text-center py-4 sticky top-0 z-10">
-                <Link href="/" className="absolute left-4 top-3 text-white text-xl"><HiChevronLeft className="text-4xl" /></Link>
-                <h1 className="text-lg font-semibold">၀င်ငွေရေးသွင်း</h1>
+                <Link href="/" className="absolute left-4 top-3 text-white text-xl">
+                    <HiChevronLeft className="text-4xl" />
+                </Link>
+                <h1 className="text-lg font-semibold">ပြင်ဆင်ရန်</h1>
+                <button
+                    onClick={handleDelete}
+                    className="absolute right-4 top-3 text-white text-xl"
+                >
+                    <MdDeleteForever className="text-4xl" />
+                </button>
             </div>
 
             {/* Error Message */}
@@ -73,17 +108,15 @@ export default function Income() {
                 </div>
             )}
 
-            {/* Category label */}
+            {/* Category Selection */}
             <div className="mt-4 w-full px-6 text-gray-700 font-medium text-base">
                 အမျိုးအစားရွေးရန်
             </div>
-
-            {/* Categories grid */}
             <div className="mt-4 px-6 w-full">
-                {!selectedCategory ? (
+            {!selectedCategory ? (
                     <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
                         {categories
-                            .filter(item => item.type === "income")
+                            .filter(item => item.type === "expense")
                             .map((item, index) => (
                                 <div
                                     key={index}
@@ -113,64 +146,58 @@ export default function Income() {
                 )}
             </div>
 
-            {/* Amount Section */}
+            {/* Amount Input */}
             <div className="w-full px-6 mt-6">
                 <label className="text-gray-700 font-medium">ပမာဏ</label>
                 <input
                     type="number"
                     placeholder="Enter amount"
-                    required
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className={`w-full mt-2 p-2 rounded-md bg-blue-50 text-gray ${!amount && error ? 'border border-red-500' : ''}`}
+                    className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
                 />
             </div>
 
-            {/* Notes Section */}
+            {/* Note Input */}
             <div className="w-full px-6 mt-6">
-                <label className="text-gray font-medium">မှတ်စု</label>
+                <label className="text-gray-700 font-medium">မှတ်စု</label>
                 <textarea
-                    placeholder="Enter Notes"
+                    placeholder="Enter note"
                     rows={4}
-                    maxLength={200}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
                 ></textarea>
             </div>
 
-            {/* Date Picker */}
+            {/* Date Input */}
             <div className="w-full px-6 mt-6">
                 <label className="text-gray-700 font-medium">နေ့ ရက်</label>
                 <input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className={`w-full mt-2 p-2 rounded-md bg-blue-50 text-gray ${!date && error ? 'border border-red-500' : ''}`}
+                    className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
                 />
             </div>
 
             {/* Action Buttons */}
             <div className="mt-6 w-full px-6 space-y-3">
                 <button
-                    disabled={!selectedCategory || !amount || !date || loading}
+                    disabled={loading}
                     onClick={handleSubmit}
-                    className={`w-full bg-blue-500 text-white py-3 rounded-full font-semibold ${(!selectedCategory || !amount || !date || loading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-blue-500 text-white py-3 rounded-full font-semibold ${
+                        loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                 >
                     {loading ? "လုပ်ဆောင်ဆဲ..." : "အတည်ပြုမည်"}
                 </button>
-                <button
-                    onClick={() => {
-                        setSelectedCategory(null);
-                        setAmount('');
-                        setNote('');
-                        setDate(new Date().toISOString().split('T')[0]);
-                        setError('');
-                    }}
-                    className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold"
+                <Link
+                    href="/"
+                    className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold text-center block"
                 >
                     ပယ်ဖျက်မည်
-                </button>
+                </Link>
             </div>
         </div>
     );

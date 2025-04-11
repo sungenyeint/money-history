@@ -9,6 +9,7 @@ export default function Home() {
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("current"); // Filter state (current, previous, all)
+    const [isScrolled, setIsScrolled] = useState(false); // State to track scroll position
 
     useEffect(() => {
         // Fetch transaction data from the API
@@ -56,6 +57,18 @@ export default function Home() {
         setFilteredTransactions(filtered);
     }, [filter, transactions]);
 
+    useEffect(() => {
+        // Add scroll event listener to track scroll position
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 50); // Set to true if scrolled more than 50px
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+
     // Calculate total amounts
     const amounts = (filteredTransactions || []).reduce((total, transaction) => {
         if (transaction && transaction.type === "income") {
@@ -81,24 +94,40 @@ export default function Home() {
             ) : (
                 <>
                     {/* Header */}
-                    <div className="text-center py-8 bg-blue-500 text-white sticky top-0 z-10 flex flex-col items-center">
-                        <h1 className="text-xl font-semibold m-3">လက်ရှိပိုက်ဆံ</h1>
-                        <p className="text-4xl font-bold">{amounts.toLocaleString()} MMK</p>
+                    <div
+                        className={`${
+                            isScrolled ? "py-3" : "py-8"
+                        } bg-blue-500 text-white sticky top-0 z-10 flex flex-col items-center transition-all duration-300`}
+                    >
+                        <h1
+                            className={`${
+                                isScrolled ? "m-1" : "m-3"
+                            } font-semibold transition-all duration-300`}
+                        >
+                            လက်ရှိပိုက်ဆံ
+                        </h1>
+                        <p
+                            className={`${
+                                isScrolled ? "text-3xl mt-1" : "text-4xl"
+                            } font-bold transition-all duration-300`}
+                        >
+                            {amounts.toLocaleString()} MMK
+                        </p>
                         <div className="mt-4 flex gap-4">
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
                                 className="bg-blue-600 text-white px-4 py-2 text-sm text-center transition appearance-none"
                             >
-                                <option value="previous">Previous Month</option>
-                                <option value="current">Current Month</option>
-                                <option value="all">All</option>
+                                <option value="previous">ယခင်လ</option>
+                                <option value="current">ယခုလ</option>
+                                <option value="all">အားလုံး</option>
                             </select>
                         </div>
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="bg-white rounded-t-3xl p-6 flex flex-col gap-6 text-gray-800 shadow-lg">
+                    <div className="bg-white p-6 flex flex-col gap-6 text-gray-800 mt-4 mx-4">
                         <div className="flex justify-around gap-4">
                             <Link href="/income">
                                 <div className="bg-green-100 hover:bg-green-200 transition rounded-xl shadow-md py-4 px-2 w-36 text-center border-2 border-green-300">
@@ -119,12 +148,14 @@ export default function Home() {
                         </div>
                         {/* Buttons for Month Total and Chart */}
                         <div className="flex flex-col items-center gap-4 mt-4">
-                            <Link href={"/chart"}
+                            <Link
+                                href={"/chart"}
                                 className="bg-blue-100 hover:bg-blue-200 text-blue-500 px-4 py-2 rounded-lg shadow-md transition w-full border-2 border-blue-300 text-center"
                             >
                                 စာရင်းပြ Chart များ
                             </Link>
-                            <Link href={"/summary"}
+                            <Link
+                                href={"/summary"}
                                 className="bg-purple-100 hover:bg-purple-200 text-purple-500 px-4 py-2 rounded-lg shadow-md transition w-full border-2 border-purple-300 text-center"
                             >
                                 စာရင်းချုပ်
@@ -133,11 +164,8 @@ export default function Home() {
 
                         {/* Transaction List */}
                         {filteredTransactions.length === 0 && (
-                            <div className="text-center text-gray-500">
-                                No transactions available for the selected filter.
-                            </div>
-                            )
-                        }
+                            <div className="text-center text-gray-500">စာရင်းမရှိပါ။</div>
+                        )}
                         <div className="flex flex-col gap-4">
                             {filteredTransactions.map((transaction, index) => (
                                 <Link

@@ -150,7 +150,7 @@ export default function ChartPage() {
                         <HiChevronLeft />
                     </Link>
 
-                    <h1 className="text-lg font-semibold">Income & Expense Charts</h1>
+                    <h1 className="text-lg font-semibold">စာရင်း Charts များ</h1>
 
                     <div className="relative">
                         <FaFilter className="text-xl cursor-pointer" onClick={()=> setShowDatePicker(!showDatePicker)}
@@ -222,10 +222,16 @@ export default function ChartPage() {
                 </div>
             </div>
 
+            {filteredTransactions.length === 0 && (
+                <div className="flex items-center justify-center h-screen text-gray-500">
+                    <p>စာရင်းမရှိပါ။</p>
+                </div>
+                )
+            }
             {/* Income Chart */}
             <div className="w-full px-6 mt-6">
                 <h2 className="text-center text-lg font-semibold text-gray-700 mb-4">
-                    Income by Category
+                    ၀င်ငွေပြ Chart များ
                 </h2>
                 <Doughnut data={incomeChartData} options={options} />
             </div>
@@ -233,7 +239,7 @@ export default function ChartPage() {
             {/* Expense Chart */}
             <div className="w-full px-6 mt-6">
                 <h2 className="text-center text-lg font-semibold text-gray-700 mb-4">
-                    Expense by Category
+                    ထွက်ငွေပြ Chart များ
                 </h2>
                 <Doughnut data={expenseChartData} options={options} />
             </div>
