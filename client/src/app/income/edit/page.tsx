@@ -1,5 +1,5 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"; // Import Next.js router
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
@@ -14,33 +14,56 @@ export default function EditIncome() {
     const [transaction, setTransaction] = useState(null);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [amount, setAmount] = useState('');
-    const [note, setNote] = useState('');
-    const [date, setDate] = useState('');
+    const [amount, setAmount] = useState("");
+    const [note, setNote] = useState("");
+    const [date, setDate] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
+    const router = useRouter(); // Initialize Next.js router
 
     useEffect(() => {
-        // Fetch transaction details
-        if (id) {
-            axios
-                .get(`http://localhost:5000/api/transactions/${id}`)
-                .then((response) => {
-                    const data = response.data;
+        const fetchTransactionAndCategories = async () => {
+            try {
+                const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+                if (!token) {
+                    throw new Error("No token found. Please log in.");
+                }
+
+                // Fetch transaction details
+                if (id) {
+                    const transactionResponse = await axios.get(
+                        `http://localhost:5000/api/transactions/${id}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`, // Pass the token
+                            },
+                        }
+                    );
+                    const data = transactionResponse.data;
                     setTransaction(data);
                     setSelectedCategory(data.category?._id || null);
-                    setAmount(data.amount || '');
-                    setNote(data.note || '');
-                    setDate(new Date(data.date).toISOString().split('T')[0]);
-                })
-                .catch((error) => console.error("Error fetching transaction:", error));
-        }
+                    setAmount(data.amount || "");
+                    setNote(data.note || "");
+                    setDate(new Date(data.date).toISOString().split("T")[0]);
+                }
 
-        // Fetch categories
-        axios
-            .get("http://localhost:5000/api/categories")
-            .then((response) => setCategories(response.data))
-            .catch((error) => console.error("Error fetching categories:", error));
+                // Fetch categories
+                const categoriesResponse = await axios.get(
+                    "http://localhost:5000/api/categories",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`, // Pass the token
+                        },
+                    }
+                );
+                setCategories(categoriesResponse.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setError("Failed to fetch data. Please try again.");
+            }
+        };
+
+        fetchTransactionAndCategories();
     }, [id]);
 
     const handleSubmit = async () => {
@@ -50,7 +73,7 @@ export default function EditIncome() {
         }
 
         setLoading(true);
-        setError('');
+        setError("");
 
         const updatedTransaction = {
             category: selectedCategory,
@@ -61,13 +84,26 @@ export default function EditIncome() {
         };
 
         try {
-            await axios.put(`http://localhost:5000/api/transactions/${id}`, updatedTransaction);
-            // alert("Transaction updated successfully!");
-            window.location.href = "/";
+            const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+            if (!token) {
+                throw new Error("No token found. Please log in.");
+            }
+
+            await axios.put(
+                `http://localhost:5000/api/transactions/${id}`,
+                updatedTransaction,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Pass the token
+                    },
+                }
+            );
+
+            // Redirect to home page using Next.js router
+            router.push("/");
         } catch (error) {
             console.error("Error updating transaction:", error);
-            setError("ailed to update transaction.");
-            // alert("Failed to update transaction.");
+            setError("Failed to update transaction.");
         } finally {
             setLoading(false);
         }
@@ -76,14 +112,25 @@ export default function EditIncome() {
     const handleDelete = async () => {
         if (confirm("Are you sure you want to delete this transaction?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/transactions/${id}`);
-                window.location.href = "/";
+                const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+                if (!token) {
+                    throw new Error("No token found. Please log in.");
+                }
+
+                await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Pass the token
+                    },
+                });
+
+                // Redirect to home page using Next.js router
+                router.push("/");
             } catch (error) {
                 console.error("Error deleting transaction:", error);
-                setError("Error deleting transaction:");
+                setError("Failed to delete transaction.");
             }
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center">
@@ -113,28 +160,35 @@ export default function EditIncome() {
                 အမျိုးအစားရွေးရန်
             </div>
             <div className="mt-4 px-6 w-full">
-            {!selectedCategory ? (
+                {!selectedCategory ? (
                     <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
                         {categories
-                            .filter(item => item.type === "income")
+                            .filter((item) => item.type === "income")
                             .map((item, index) => (
                                 <div
                                     key={index}
-                                    className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${selectedCategory === item._id ? 'border-2 border-blue-500' : ''}`}
+                                    className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${
+                                        selectedCategory === item._id
+                                            ? "border-2 border-blue-500"
+                                            : ""
+                                    }`}
                                     onClick={() => setSelectedCategory(item._id)}
                                 >
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl ${index % 2 === 0 ? 'bg-green-500' : 'bg-yellow-500'}`}>
+                                    <div
+                                        className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl ${
+                                            index % 2 === 0 ? "bg-green-500" : "bg-yellow-500"
+                                        }`}
+                                    >
                                         <MdDirectionsBus />
                                     </div>
                                     <span className="mt-2 text-center">{item.name}</span>
                                 </div>
-                            ))
-                        }
+                            ))}
                     </div>
                 ) : (
                     <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
                         <span className="text-gray-700 font-medium">
-                            {categories.find(item => item._id === selectedCategory)?.name}
+                            {categories.find((item) => item._id === selectedCategory)?.name}
                         </span>
                         <button
                             onClick={() => setSelectedCategory(null)}
@@ -187,7 +241,7 @@ export default function EditIncome() {
                     disabled={loading}
                     onClick={handleSubmit}
                     className={`w-full bg-blue-500 text-white py-3 rounded-full font-semibold ${
-                        loading ? 'opacity-50 cursor-not-allowed' : ''
+                        loading ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                 >
                     {loading ? "လုပ်ဆောင်ဆဲ..." : "အတည်ပြုမည်"}

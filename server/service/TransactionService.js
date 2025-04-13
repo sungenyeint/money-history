@@ -1,16 +1,31 @@
 const Transaction = require('../model/Transaction');
 
-// Get all Transaction records
-exports.getAll = () => Transaction.find().populate('category');
+// Get all transactions for a specific user and populate the category field
+exports.getAll = async (userId) => {
+  return await Transaction.find({ userId }).populate('category'); // Populate the category field
+};
 
-// Create a new Transaction record
-exports.create = (data) => Transaction.create(data);
+// Create a new transaction
+exports.create = async (transactionData) => {
+  const transaction = new Transaction(transactionData);
+  return await transaction.save();
+};
 
-// Get a single Transaction record by ID
-exports.getById = (id) => Transaction.findById(id).populate('category');
+// Get a single transaction by ID for a specific user and populate the category field
+exports.getById = async (id, userId) => {
+  return await Transaction.findOne({ _id: id, userId }).populate('category'); // Populate the category field
+};
 
-// Update an Transaction record by ID
-exports.update = (id, data) => Transaction.findByIdAndUpdate(id, data, { new: true }).populate('category');
+// Update a transaction by ID for a specific user
+exports.update = async (id, transactionData, userId) => {
+  return await Transaction.findOneAndUpdate(
+    { _id: id, userId }, // Query by _id and userId
+    transactionData,
+    { new: true } // Return the updated document
+  ).populate('category'); // Populate the category field
+};
 
-// Delete an Transaction record by ID
-exports.remove = (id) => Transaction.findByIdAndDelete(id);
+// Delete a transaction by ID for a specific user
+exports.remove = async (id, userId) => {
+  return await Transaction.findOneAndDelete({ _id: id, userId }); // Query by _id and userId
+};

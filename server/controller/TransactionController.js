@@ -1,49 +1,56 @@
 const TransactionService = require('../service/TransactionService');
 
-// Get all income records
+// Get all transactions for the authenticated user
 exports.getAll = async (req, res) => {
   try {
-    const items = await TransactionService.getAll();
+    const userId = req.user.uid; // Extract userId from the authenticated user
+    const items = await TransactionService.getAll(userId); // Pass userId to the service
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Create a new income record
+// Create a new transaction for the authenticated user
 exports.create = async (req, res) => {
   try {
-    const item = await TransactionService.create(req.body);
+    const userId = req.user.uid; // Extract userId from the authenticated user
+    const transactionData = { ...req.body, userId }; // Add userId to the transaction data
+    const item = await TransactionService.create(transactionData);
     res.status(201).json(item);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Get a single income record by ID
+// Get a single transaction by ID for the authenticated user
 exports.getById = async (req, res) => {
   try {
-    const item = await TransactionService.getById(req.params.id);
+    const userId = req.user.uid; // Extract userId from the authenticated user
+    const item = await TransactionService.getById(req.params.id, userId); // Pass userId to the service
     item ? res.json(item) : res.status(404).json({ error: 'Not found' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Update an income record by ID
+// Update a transaction by ID for the authenticated user
 exports.update = async (req, res) => {
   try {
-    const item = await TransactionService.update(req.params.id, req.body);
+    const userId = req.user.uid; // Extract userId from the authenticated user
+    const transactionData = { ...req.body, userId }; // Ensure userId is included
+    const item = await TransactionService.update(req.params.id, transactionData, userId); // Pass userId to the service
     item ? res.json(item) : res.status(404).json({ error: 'Not found' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Delete an income record by ID
+// Delete a transaction by ID for the authenticated user
 exports.remove = async (req, res) => {
   try {
-    const item = await TransactionService.remove(req.params.id);
+    const userId = req.user.uid; // Extract userId from the authenticated user
+    const item = await TransactionService.remove(req.params.id, userId); // Pass userId to the service
     item ? res.json({ message: 'Deleted' }) : res.status(404).json({ error: 'Not found' });
   } catch (err) {
     res.status(500).json({ error: err.message });

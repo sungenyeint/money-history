@@ -1,6 +1,7 @@
 'use client';
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Import Next.js router
 import { useEffect, useState } from "react";
 import { FiEdit } from "react-icons/fi";
 import { HiChevronLeft } from "react-icons/hi";
@@ -14,11 +15,29 @@ export default function Income() {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(false); // Loading state for submission
     const [error, setError] = useState(''); // Error message for validation
+    const router = useRouter(); // Initialize Next.js router
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/categories")
-            .then(response => setCategories(response.data))
-            .catch(error => console.error("Error fetching categories:", error));
+        const fetchCategories = async () => {
+            try {
+                const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+                if (!token) {
+                    throw new Error("No token found. Please log in.");
+                }
+
+                const response = await axios.get("http://localhost:5000/api/categories", {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+                    },
+                });
+
+                setCategories(response.data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
+        fetchCategories();
     }, []);
 
     const handleSubmit = async () => {
@@ -39,20 +58,28 @@ export default function Income() {
         };
 
         try {
-            await axios.post("http://localhost:5000/api/transactions", transactionData);
-            // Show success notification
-            // alert("Transaction added successfully!");
+            const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+            if (!token) {
+                throw new Error("No token found. Please log in.");
+            }
+
+            await axios.post("http://localhost:5000/api/transactions", transactionData, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+                },
+            });
+
             // Reset form
             setSelectedCategory(null);
             setAmount('');
             setNote('');
             setDate(new Date().toISOString().split('T')[0]);
-            // Redirect to home page
-            window.location.href = "/";
+
+            // Redirect to home page using Next.js router
+            router.push("/");
         } catch (error) {
             console.error("Error posting transaction:", error);
             setError("Failed to add transaction.");
-            // alert("Failed to add transaction.");
         } finally {
             setLoading(false); // Stop loading
         }

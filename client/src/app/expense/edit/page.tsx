@@ -1,5 +1,5 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
@@ -19,12 +19,22 @@ export default function EditExpense() {
     const [date, setDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const router = useRouter(); // Initialize Next.js router
 
+    // Retrieve the token from localStorage
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+        throw new Error("No token found. Please log in.");
+    }
     useEffect(() => {
         // Fetch transaction details
         if (id) {
             axios
-                .get(`http://localhost:5000/api/transactions/${id}`)
+                .get(`http://localhost:5000/api/transactions/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Pass the token
+                    },
+                })
                 .then((response) => {
                     const data = response.data;
                     setTransaction(data);
@@ -38,7 +48,11 @@ export default function EditExpense() {
 
         // Fetch categories
         axios
-            .get("http://localhost:5000/api/categories")
+            .get("http://localhost:5000/api/categories", {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Pass the token
+                },
+            })
             .then((response) => setCategories(response.data))
             .catch((error) => console.error("Error fetching categories:", error));
     }, [id]);
@@ -61,9 +75,13 @@ export default function EditExpense() {
         };
 
         try {
-            await axios.put(`http://localhost:5000/api/transactions/${id}`, updatedTransaction);
+            await axios.put(`http://localhost:5000/api/transactions/${id}`, updatedTransaction, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Pass the token
+                },
+            });
             // alert("Transaction updated successfully!");
-            window.location.href = "/";
+            router = "/";
         } catch (error) {
             console.error("Error updating transaction:", error);
             setError("ailed to update transaction.");
@@ -76,8 +94,12 @@ export default function EditExpense() {
     const handleDelete = async () => {
         if (confirm("Are you sure you want to delete this transaction?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/transactions/${id}`);
-                window.location.href = "/";
+                await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Pass the token
+                    },
+                });
+                router = "/";
             } catch (error) {
                 console.error("Error deleting transaction:", error);
                 setError("Error deleting transaction:");

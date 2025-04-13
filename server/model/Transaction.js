@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-    category: {type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true},
+    userId: { type: String, required: true }, // Store Firebase uid as a string
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
     type: { type: String, enum: ['income', 'expense'], required: true },
     amount: { type: Number, required: true },
     note: { type: String },
