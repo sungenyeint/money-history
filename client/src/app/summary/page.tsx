@@ -138,7 +138,7 @@ export default function SummaryPage() {
                         <HiChevronLeft />
                     </Link>
 
-                    <h1 className="text-lg font-semibold">Income & Expense Charts</h1>
+                    <h1 className="text-lg font-semibold">စာရင်းချုပ်</h1>
 
                     <div className="relative">
                         <FaFilter
@@ -233,54 +233,58 @@ export default function SummaryPage() {
 
             {/* Transactions Table */}
             <div className="w-full px-6 mt-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-700">
-                        {new Date(filterYear, filterMonth - 1).toLocaleString("default", { month: "long" })} {filterYear}
-                    </h2>
-                    <FaDownload
-                        title="Download PDF"
-                        className="text-xl text-blue-500 cursor-pointer"
-                        onClick={handleDownloadPDF}
-                    />
-                </div>
                 {filteredTransactions.length === 0 ? (
-                    <p className="text-center text-gray-500">No transactions found.</p>
+                    <div className="flex items-center justify-center h-screen text-gray-500">
+                        <p>စာရင်းမရှိပါ။</p>
+                    </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-gray-500 border-collapse">
-                            <thead className="bg-gray-100 text-gray-700 text-lg font-bold">
-                                <tr>
-                                    <th className="px-4 py-2">Date</th>
-                                    <th className="px-4 py-2">Category</th>
-                                    <th className="px-4 py-2">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredTransactions.map((transaction, index) => (
-                                    <tr
-                                        key={index}
-                                        className={`${
-                                            transaction.type === "income" ? "bg-green-50" : "bg-red-50"
-                                        }`}
-                                    >
-                                        <td className="px-4 py-2">
-                                            {new Date(transaction.date).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            {transaction.category?.name || "Unknown Category"}
-                                        </td>
-                                        <td
-                                            className={`px-4 py-2 font-semibold text-right ${
-                                                transaction.type === "income" ? "text-green-500" : "text-red-500"
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold text-gray-700">
+                                {new Date(filterYear, filterMonth - 1).toLocaleString("default", { month: "long" })} {filterYear}
+                            </h2>
+                            <FaDownload
+                                title="Download PDF"
+                                className="text-xl text-blue-500 cursor-pointer"
+                                onClick={handleDownloadPDF}
+                            />
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-500 border-collapse">
+                                <thead className="bg-gray-100 text-gray-700 text-lg font-bold">
+                                    <tr>
+                                        <th className="px-4 py-2">နေ့ ရက်</th>
+                                        <th className="px-4 py-2">အမျိုးအစား</th>
+                                        <th className="px-4 py-2">ပမာဏ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredTransactions.map((transaction, index) => (
+                                        <tr
+                                            key={index}
+                                            className={`${
+                                                transaction.type === "income" ? "bg-green-50" : "bg-red-50"
                                             }`}
                                         >
-                                            {transaction.type === "income" ? "+ " : "- "}
-                                            {Number(transaction.amount).toLocaleString()}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                            <td className="px-4 py-2">
+                                                {new Date(transaction.date).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {transaction.category?.name || "Unknown Category"}
+                                            </td>
+                                            <td
+                                                className={`px-4 py-2 font-semibold text-right ${
+                                                    transaction.type === "income" ? "text-green-500" : "text-red-500"
+                                                }`}
+                                            >
+                                                {transaction.type === "income" ? "+ " : "- "}
+                                                {Number(transaction.amount).toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>
@@ -288,7 +292,7 @@ export default function SummaryPage() {
             {/* Total Amount */}
             <div className="w-full px-6 mt-6">
                 <div className="flex justify-between items-center p-4 bg-blue-100 rounded-md shadow-md">
-                    <p className="text-lg font-medium text-gray-800">Total Amount</p>
+                    <p className="text-lg font-medium text-gray-800">စုစုပေါင်း</p>
                     <p
                         className={`text-lg font-semibold ${
                             totalAmount >= 0 ? "text-green-500" : "text-red-500"

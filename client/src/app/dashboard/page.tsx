@@ -104,37 +104,61 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100 mb-18 text-gray-800 flex flex-col">
+            {/* Filter Buttons */}
+            <div className="bg-blue-500 flex justify-center p-2">
+                <div className="flex gap-2 bg-white border-2 border-blue-300">
+                    <button
+                        onClick={() => setFilter("previous")}
+                        className={`p-1 text-sm transition ${
+                            filter === "previous"
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-600"
+                        }`}
+                    >
+                        ယခင်လ
+                    </button>
+                    <button
+                        onClick={() => setFilter("current")}
+                        className={`p-1 text-sm transition ${
+                            filter === "current"
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-600"
+                        }`}
+                    >
+                        ယခုလ
+                    </button>
+                    <button
+                        onClick={() => setFilter("all")}
+                        className={`p-1 text-sm transition ${
+                            filter === "all"
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-600"
+                        }`}
+                    >
+                        အားလုံး
+                    </button>
+                </div>
+            </div>
             {/* Header */}
             <div
                 className={`${
-                    isScrolled ? "py-3" : "py-8"
+                    isScrolled ? "py-3" : "pt-4 pb-6"
                 } bg-blue-500 text-white sticky top-0 z-10 flex flex-col items-center transition-all duration-300`}
             >
                 <h1
                     className={`${
-                        isScrolled ? "m-1" : "m-3"
+                        isScrolled ? "m-2 text-xl" : "m-3 text-2xl"
                     } font-semibold transition-all duration-300`}
                 >
-                    လက်ရှိပိုက်ဆံ
+                    {filter === "current" ? "ယခုလ ရှိငွေ" : filter === "previous" ? "ယခင်လ ရှိငွေ" : "လက်ရှိငွေ"}
                 </h1>
                 <p
                     className={`${
-                        isScrolled ? "text-3xl mt-1" : "text-4xl"
+                        isScrolled ? "text-3xl mt-1" : "mt-3 text-4xl"
                     } font-bold transition-all duration-300`}
                 >
                     {amounts.toLocaleString()} MMK
                 </p>
-                <div className="mt-4 flex gap-4">
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        className="bg-blue-600 text-white px-4 py-2 text-sm text-center transition appearance-none"
-                    >
-                        <option value="previous">ယခင်လ</option>
-                        <option value="current">ယခုလ</option>
-                        <option value="all">အားလုံး</option>
-                    </select>
-                </div>
             </div>
 
             {/* Summary Cards */}

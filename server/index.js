@@ -5,8 +5,13 @@ const verifyFirebaseToken = require("./middleware/authMiddleware");
 require('dotenv').config()
 
 const app = express();
+const allowedOrigins = [
+    'https://your-production-url.com', // Replace with your production URL
+    'http://localhost:3000'
+];
+
 app.use(cors({
-    origin: "http://localhost:3000", // Replace with your client URL
+    origin: allowedOrigins, // Replace with your client URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
