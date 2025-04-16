@@ -8,7 +8,8 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "firebase-admin": "^13.2.0",
-    "mongoose": "^7.0.0"
+    "mongoose": "^7.0.0",
+    "suboo": "file:.."
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
