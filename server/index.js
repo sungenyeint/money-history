@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const verifyFirebaseToken = require("./middleware/authMiddleware");
-require('dotenv').config({path: './.env'});
+require('dotenv').config({path: '../.env'});
 
 const app = express();
 const allowedOrigins = [
