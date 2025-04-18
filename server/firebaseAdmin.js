@@ -1,5 +1,5 @@
 const admin = require("firebase-admin");
-require("dotenv").config({ path: "../.env" }); // Load the .env file
+require("dotenv").config(); // Load the .env file
 
 // Parse the service account key from the environment variable
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
