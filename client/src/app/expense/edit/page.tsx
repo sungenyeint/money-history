@@ -7,13 +7,18 @@ import { HiChevronLeft } from "react-icons/hi";
 import { MdDeleteForever, MdDirectionsBus } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 
+interface Category {
+    _id: string;
+    name: string;
+    type: "income" | "expense";
+}
+
 export default function EditExpense() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id"); // Get the "id" from the query string
 
-    const [transaction, setTransaction] = useState(null);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [amount, setAmount] = useState('');
     const [note, setNote] = useState('');
     const [date, setDate] = useState('');
@@ -37,7 +42,6 @@ export default function EditExpense() {
                 })
                 .then((response) => {
                     const data = response.data;
-                    setTransaction(data);
                     setSelectedCategory(data.category?._id || null);
                     setAmount(data.amount || '');
                     setNote(data.note || '');
@@ -55,7 +59,7 @@ export default function EditExpense() {
             })
             .then((response) => setCategories(response.data))
             .catch((error) => console.error("Error fetching categories:", error));
-    }, [id]);
+    }, [id, token]);
 
     const handleSubmit = async () => {
         if (!selectedCategory || !amount || !date) {
@@ -81,7 +85,7 @@ export default function EditExpense() {
                 },
             });
             // alert("Transaction updated successfully!");
-            router = "/";
+            router.push("/");
         } catch (error) {
             console.error("Error updating transaction:", error);
             setError("ailed to update transaction.");
@@ -99,7 +103,7 @@ export default function EditExpense() {
                         Authorization: `Bearer ${token}`, // Pass the token
                     },
                 });
-                router = "/";
+                router.push("/");
             } catch (error) {
                 console.error("Error deleting transaction:", error);
                 setError("Error deleting transaction:");

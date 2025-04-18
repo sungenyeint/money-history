@@ -3,11 +3,21 @@ import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import "font-awesome/css/font-awesome.min.css";
-import { useAuth } from "@/hooks/useAuth";
+
+interface Transaction {
+    _id: string;
+    date: string;
+    amount: number;
+    type: string;
+    category: {
+        name: string;
+    };
+    note: string;
+}
 
 export default function Dashboard() {
-    const [transactions, setTransactions] = useState([]);
-    const [filteredTransactions, setFilteredTransactions] = useState([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("current"); // Filter state (current, previous, all)
     const [isScrolled, setIsScrolled] = useState(false); // State to track scroll position

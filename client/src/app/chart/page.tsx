@@ -4,7 +4,7 @@ import axios from "axios";
 import Link from "next/link";
 import { HiChevronLeft } from "react-icons/hi";
 import { FaFilter } from "react-icons/fa";
-import { Doughnut } from "react-chartjs-2";
+// import { Doughnut } from "react-chartjs-2";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -17,15 +17,31 @@ import {
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, ArcElement, Tooltip, Legend);
 
+interface Transaction {
+    _id: string;
+    date: string;
+    amount: number;
+    type: string;
+    category: {
+        name: string;
+    };
+    note: string;
+}
+
+// interface ChartData {
+//     labels: string[];
+//     amounts: number[];
+// }
+
 export default function ChartPage() {
-    const [transactions, setTransactions] = useState([]);
-    const [filteredTransactions, setFilteredTransactions] = useState([]);
-    const [incomeData, setIncomeData] = useState({ labels: [], amounts: [] });
-    const [expenseData, setExpenseData] = useState({ labels: [], amounts: [] });
-    const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-    const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [filter, setFilter] = useState(false);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+    // const [incomeData, setIncomeData] = useState<ChartData>({ labels: [], amounts: [] });
+    // const [expenseData, setExpenseData] = useState<ChartData>({ labels: [], amounts: [] });
+    const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
+    const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth() + 1);
+    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const [filter, setFilter] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -66,12 +82,12 @@ export default function ChartPage() {
             );
         });
         setFilteredTransactions(filtered);
-    }, [transactions, filter]);
+    }, [transactions, filterYear, filterMonth]);
 
     useEffect(() => {
         // Process data for income and expense charts
-        const incomeCategories = {};
-        const expenseCategories = {};
+        const incomeCategories: Record<string, number> = {};
+        const expenseCategories: Record<string, number> = {};
 
         filteredTransactions.forEach((transaction) => {
             const category = transaction.category?.name || "Unknown";
@@ -84,17 +100,18 @@ export default function ChartPage() {
             }
         });
 
-        setIncomeData({
-            labels: Object.keys(incomeCategories),
-            amounts: Object.values(incomeCategories),
-        });
+        // setIncomeData({
+        //     labels: Object.keys(incomeCategories),
+        //     amounts: Object.values(incomeCategories),
+        // });
 
-        setExpenseData({
-            labels: Object.keys(expenseCategories),
-            amounts: Object.values(expenseCategories),
-        });
+        // setExpenseData({
+        //     labels: Object.keys(expenseCategories),
+        //     amounts: Object.values(expenseCategories),
+        // });
     }, [filteredTransactions]);
 
+    {/* 
     const incomeChartData = {
         labels: incomeData.labels,
         datasets: [
@@ -143,18 +160,18 @@ export default function ChartPage() {
         responsive: true,
         plugins: {
             legend: {
-                position: "top",
+                position: "bottom" as const  // This ensures TypeScript knows it's a valid position
             },
             tooltip: {
                 callbacks: {
-                    label: (tooltipItem) => {
-                        const value = tooltipItem.raw;
-                        return `${tooltipItem.label}: ${value.toLocaleString()} MMK`;
-                    },
-                },
-            },
-        },
+                    label: (tooltipItem: { raw: number | string; label: string; }) => {
+                        return `${tooltipItem.label}: ${tooltipItem.raw}`;
+                    }
+                }
+            }
+        }
     };
+    */}
 
     return (
         <div className="min-h-screen bg-gray-50 mb-18 flex flex-col items-center">
@@ -269,7 +286,7 @@ export default function ChartPage() {
                         <h2 className="text-center text-lg font-semibold text-gray-700 mb-4">
                             ၀င်ငွေပြ Chart များ
                         </h2>
-                        <Doughnut data={incomeChartData} options={options} />
+                        {/* <Doughnut data={incomeChartData} options={options} /> */}
                     </div>
 
                     {/* Expense Chart */}
@@ -277,7 +294,7 @@ export default function ChartPage() {
                         <h2 className="text-center text-lg font-semibold text-gray-700 mb-4">
                             ထွက်ငွေပြ Chart များ
                         </h2>
-                        <Doughnut data={expenseChartData} options={options} />
+                        {/* <Doughnut data={expenseChartData} options={options} /> */}
                     </div>
                 </div>
             )}
@@ -285,3 +302,4 @@ export default function ChartPage() {
         </div>
     );
 }
+

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FaHome } from "react-icons/fa";
 import { FaCircleDollarToSlot } from "react-icons/fa6";
-import { FiMoreHorizontal, FiSettings } from "react-icons/fi";
+import { FiSettings } from "react-icons/fi";
 
 export default function Footer() {
     return (

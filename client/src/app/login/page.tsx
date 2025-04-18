@@ -25,8 +25,12 @@ export default function Login() {
             const token = await result.user.getIdToken();
             localStorage.setItem("authToken", token);
             router.push("/dashboard");
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('An unexpected error occurred');
+            }
         }
     };
 
@@ -36,8 +40,12 @@ export default function Login() {
             const token = await result.user.getIdToken();
             localStorage.setItem("authToken", token);
             router.push("/dashboard");
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('An unexpected error occurred');
+            }
         }
     };
 

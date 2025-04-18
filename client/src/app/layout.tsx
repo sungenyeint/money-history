@@ -1,5 +1,4 @@
 'use client';
-import type { Metadata } from "next";
 import "../styles/globals.css";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ConditionalFooter from "@/components/ConditionalFooter"; // Import the new ConditionalFooter component

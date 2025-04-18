@@ -7,13 +7,18 @@ import { HiChevronLeft } from "react-icons/hi";
 import { MdDeleteForever, MdDirectionsBus } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 
+interface Category {
+    _id: string;
+    type: "income" | "expense";
+    name: string;
+}
+
 export default function EditIncome() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id"); // Get the "id" from the query string
 
-    const [transaction, setTransaction] = useState(null);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [amount, setAmount] = useState("");
     const [note, setNote] = useState("");
     const [date, setDate] = useState("");
@@ -40,7 +45,6 @@ export default function EditIncome() {
                         }
                     );
                     const data = transactionResponse.data;
-                    setTransaction(data);
                     setSelectedCategory(data.category?._id || null);
                     setAmount(data.amount || "");
                     setNote(data.note || "");

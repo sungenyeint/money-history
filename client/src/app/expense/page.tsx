@@ -6,9 +6,15 @@ import { HiChevronLeft } from "react-icons/hi";
 import { MdDirectionsBus } from "react-icons/md";
 import { useRouter } from "next/navigation"; // Import Next.js router
 
+interface Category {
+    _id: string;
+    type: string;
+    name: string;
+}
+
 export default function Expense() {
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [amount, setAmount] = useState("");
     const [note, setNote] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);

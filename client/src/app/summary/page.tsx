@@ -2,20 +2,27 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Import Next.js router
 import { HiChevronLeft } from "react-icons/hi";
 import { FaDownload, FaFilter } from "react-icons/fa";
 import registerMyanmarFont from "../NotoSansMyanmar-Regular.js"; // Adjust the path as necessary
 
+interface Transaction {
+    id: string;
+    amount: number;
+    date: string;
+    type: string;
+    category: {
+        name: string;
+    };
+}
+
 export default function SummaryPage() {
-    const [transactions, setTransactions] = useState([]);
-    const [filteredTransactions, setFilteredTransactions] = useState([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
     const [filterYear, setFilterYear] = useState(new Date().getFullYear());
     const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [filter, setFilter] = useState(false);
-    const [error, setError] = useState(""); // Error state for API calls
-    const router = useRouter(); // Initialize Next.js router
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -39,7 +46,6 @@ export default function SummaryPage() {
                 }
             } catch (error) {
                 console.error("Error fetching transaction data:", error);
-                setError("Failed to fetch transactions. Please try again.");
             }
         };
 
@@ -56,7 +62,7 @@ export default function SummaryPage() {
             );
         });
         setFilteredTransactions(filtered);
-    }, [transactions, filter]);
+    }, [transactions, filterYear, filterMonth]);
 
     const totalAmount = filteredTransactions.reduce((sum, transaction) => {
         return sum + (transaction.type === "income" ? transaction.amount : -transaction.amount);

@@ -7,9 +7,15 @@ import { FiEdit } from "react-icons/fi";
 import { HiChevronLeft } from "react-icons/hi";
 import { MdDirectionsBus } from "react-icons/md";
 
+interface Category {
+    _id: string;
+    name: string;
+    type: "income" | "expense";
+}
+
 export default function Income() {
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [amount, setAmount] = useState('');
     const [note, setNote] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
