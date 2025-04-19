@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const verifyFirebaseToken = require("./middleware/authMiddleware");
 require('dotenv').config();
-
+console.log('production url', process.env.FRONTEND_URL);
 const app = express();
 const allowedOrigins = [
-    process.env.FRONTEND_URL, // Replace with your production URL
+    process.env.PRODUCTION_URL, // Replace with your production URL
     'http://localhost:3000'
 ];
 
