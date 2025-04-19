@@ -31,7 +31,7 @@ export default function Expense() {
                 }
 
                 // Make the API call with the token in the Authorization header
-                const response = await axios.get("http://localhost:5000/api/categories", {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
                     headers: {
                         Authorization: `Bearer ${token}`, // Pass the token
                     },
@@ -70,7 +70,7 @@ export default function Expense() {
             }
 
             // Make the API call with the token in the Authorization header
-            await axios.post("http://localhost:5000/api/transactions", transactionData, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/transactions`, transactionData, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Pass the token
                 },

@@ -31,7 +31,7 @@ export default function Income() {
                     throw new Error("No token found. Please log in.");
                 }
 
-                const response = await axios.get("http://localhost:5000/api/categories", {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
                     headers: {
                         Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
                     },
@@ -69,7 +69,7 @@ export default function Income() {
                 throw new Error("No token found. Please log in.");
             }
 
-            await axios.post("http://localhost:5000/api/transactions", transactionData, {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/transactions`, transactionData, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
                 },

@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const app = express();
 const allowedOrigins = [
-    'https://your-production-url.com', // Replace with your production URL
+    process.env.FRONTEND_URL, // Replace with your production URL
     'http://localhost:3000'
 ];
 

@@ -37,7 +37,7 @@ export default function EditIncome() {
                 // Fetch transaction details
                 if (id) {
                     const transactionResponse = await axios.get(
-                        `http://localhost:5000/api/transactions/${id}`,
+                        `${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`, // Pass the token
@@ -53,7 +53,7 @@ export default function EditIncome() {
 
                 // Fetch categories
                 const categoriesResponse = await axios.get(
-                    "http://localhost:5000/api/categories",
+                    `${process.env.NEXT_PUBLIC_API_URL}/categories`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`, // Pass the token
@@ -94,7 +94,7 @@ export default function EditIncome() {
             }
 
             await axios.put(
-                `http://localhost:5000/api/transactions/${id}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`,
                 updatedTransaction,
                 {
                     headers: {
@@ -121,7 +121,7 @@ export default function EditIncome() {
                     throw new Error("No token found. Please log in.");
                 }
 
-                await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+                await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`, // Pass the token
                     },

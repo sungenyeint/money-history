@@ -53,7 +53,7 @@ export default function ChartPage() {
                 }
 
                 // Make the API call with the token in the Authorization header
-                const response = await axios.get("http://localhost:5000/api/transactions", {
+                const response = await axios.get(`${process.env.API_URL}/transactions`, {
                     headers: {
                         Authorization: `Bearer ${token}`, // Pass the token
                     },

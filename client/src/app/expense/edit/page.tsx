@@ -35,7 +35,7 @@ export default function EditExpense() {
         // Fetch transaction details
         if (id) {
             axios
-                .get(`http://localhost:5000/api/transactions/${id}`, {
+                .get(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`, // Pass the token
                     },
@@ -52,7 +52,7 @@ export default function EditExpense() {
 
         // Fetch categories
         axios
-            .get("http://localhost:5000/api/categories", {
+            .get(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Pass the token
                 },
@@ -79,7 +79,7 @@ export default function EditExpense() {
         };
 
         try {
-            await axios.put(`http://localhost:5000/api/transactions/${id}`, updatedTransaction, {
+            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, updatedTransaction, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Pass the token
                 },
@@ -98,7 +98,7 @@ export default function EditExpense() {
     const handleDelete = async () => {
         if (confirm("Are you sure you want to delete this transaction?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/transactions/${id}`, {
+                await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`, // Pass the token
                     },
