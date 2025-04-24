@@ -1,7 +1,15 @@
 'use client';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "../styles/globals.css";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ConditionalFooter from "@/components/ConditionalFooter"; // Import the new ConditionalFooter component
+import { Inter } from 'next/font/google'
+
+const inter = Inter({
+  weight: '400',
+  subsets: ['latin'],
+});
+
+const queryClient = new QueryClient();
 
 export default function RootLayout({
     children,
@@ -9,13 +17,13 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" className={`${inter.className} antialiased`}>
             <body>
-                <ProtectedRoute>
-                    {children}
-                </ProtectedRoute>
-                {/* Render ConditionalFooter */}
-                <ConditionalFooter />
+                <QueryClientProvider client={queryClient}>
+                    <ProtectedRoute>
+                        {children}
+                    </ProtectedRoute>
+                </QueryClientProvider>
             </body>
         </html>
     );

@@ -1,115 +1,98 @@
-"use client";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import axios from "axios";
+'use client';
+import { useSearchParams, useRouter } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { transactionValidationSchema } from "@/utils/validationSchemas";
 import Link from "next/link";
 import { HiChevronLeft } from "react-icons/hi";
 import { MdDeleteForever, MdDirectionsBus } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
+import apiClient from "@/utils/apiMiddleware";
 
 interface Category {
     _id: string;
-    name: string;
     type: "income" | "expense";
+    name: string;
 }
+
+type FormData = Yup.InferType<typeof transactionValidationSchema>;
 
 export default function EditExpense() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id"); // Get the "id" from the query string
+    const router = useRouter();
 
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [amount, setAmount] = useState('');
-    const [note, setNote] = useState('');
-    const [date, setDate] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const router = useRouter(); // Initialize Next.js router
+    // React Hook Form setup
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm({
+        resolver: yupResolver(transactionValidationSchema), // Integrate Yup validation
+    });
 
-    // Retrieve the token from localStorage
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-        throw new Error("No token found. Please log in.");
-    }
-    useEffect(() => {
-        // Fetch transaction details
-        if (id) {
-            axios
-                .get(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Pass the token
-                    },
-                })
-                .then((response) => {
-                    const data = response.data;
-                    setSelectedCategory(data.category?._id || null);
-                    setAmount(data.amount || '');
-                    setNote(data.note || '');
-                    setDate(new Date(data.date).toISOString().split('T')[0]);
-                })
-                .catch((error) => console.error("Error fetching transaction:", error));
+    const selectedCategory = watch("category");
+    const selectedDate = watch("date")?.toString() || new Date().toISOString().split("T")[0]; // Default to today if not set
+
+    // Fetch transaction and categories using React Query
+    const { data: categories, isLoading: isFetching, error: fetchError } = useQuery({
+        queryKey: ["transaction", id],
+        queryFn: async () => {
+            // Fetch transaction details
+            const transactionResponse = await apiClient.get(`/transactions/${id}`);
+            const transaction = transactionResponse.data;
+
+            // Set form values
+            setValue("category", transaction.category?._id || "");
+            setValue("amount", transaction.amount || 0);
+            setValue("note", transaction.note || "");
+            setValue("date", new Date(transaction.date));
+
+            // Fetch categories
+            const categoriesResponse = await apiClient.get("/categories");
+            return categoriesResponse.data;
         }
+    });
 
-        // Fetch categories
-        axios
-            .get(`${process.env.NEXT_PUBLIC_API_URL}/categories`, {
-                headers: {
-                    Authorization: `Bearer ${token}`, // Pass the token
-                },
-            })
-            .then((response) => setCategories(response.data))
-            .catch((error) => console.error("Error fetching categories:", error));
-    }, [id, token]);
-
-    const handleSubmit = async () => {
-        if (!selectedCategory || !amount || !date) {
-            setError("Please fill in all required fields.");
-            return;
-        }
-
-        setLoading(true);
-        setError('');
-
-        const updatedTransaction = {
-            category: selectedCategory,
-            amount: parseFloat(amount),
-            note,
-            date,
-            type: "expense",
-        };
-
-        try {
-            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, updatedTransaction, {
-                headers: {
-                    Authorization: `Bearer ${token}`, // Pass the token
-                },
-            });
-            // alert("Transaction updated successfully!");
+    // Mutation for updating the transaction
+    const updateMutation = useMutation({
+        mutationFn: async (data: FormData) => {
+            await apiClient.put(`/transactions/${id}`, { ...data, type: "expense" });
+        },
+        onSuccess: () => {
             router.push("/");
-        } catch (error) {
+        },
+        onError: (error) => {
             console.error("Error updating transaction:", error);
-            setError("ailed to update transaction.");
-            // alert("Failed to update transaction.");
-        } finally {
-            setLoading(false);
-        }
+        },
+    });
+
+    // Mutation for deleting the transaction
+    const deleteMutation = useMutation({
+        mutationFn: async () => {
+            await apiClient.delete(`/transactions/${id}`);
+        },
+        onSuccess: () => {
+            router.push("/");
+        },
+        onError: (error) => {
+            console.error("Error deleting transaction:", error);
+        },
+    });
+
+    const onSubmit = (data: FormData) => {
+        updateMutation.mutate(data);
     };
 
-    const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this transaction?")) {
-            try {
-                await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Pass the token
-                    },
-                });
-                router.push("/");
-            } catch (error) {
-                console.error("Error deleting transaction:", error);
-                setError("Error deleting transaction:");
-            }
+    const handleDelete = () => {
+        if (confirm("ဤငွေစာရင်းကို ဖျက်လိုသည်မှာ သေချာပါသလား။")) {
+            deleteMutation.mutate();
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center">
@@ -128,103 +111,121 @@ export default function EditExpense() {
             </div>
 
             {/* Error Message */}
-            {error && (
+            {fetchError && (
                 <div className="w-full px-6 mt-4">
-                    <p className="text-red-500 text-sm">{error}</p>
+                    <p className="text-red-500 text-sm">Error fetching data: {fetchError.message}</p>
                 </div>
             )}
 
-            {/* Category Selection */}
-            <div className="mt-4 w-full px-6 text-gray-700 font-medium text-base">
-                အမျိုးအစားရွေးရန်
-            </div>
-            <div className="mt-4 px-6 w-full">
-            {!selectedCategory ? (
-                    <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
-                        {categories
-                            .filter(item => item.type === "expense")
-                            .map((item, index) => (
-                                <div
-                                    key={index}
-                                    className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${selectedCategory === item._id ? 'border-2 border-blue-500' : ''}`}
-                                    onClick={() => setSelectedCategory(item._id)}
-                                >
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl ${index % 2 === 0 ? 'bg-green-500' : 'bg-yellow-500'}`}>
-                                        <MdDirectionsBus />
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="w-full px-6 mt-4">
+                {/* Category Selection */}
+                <div className="text-gray-700 font-medium text-base">အမျိုးအစားရွေးရန်</div>
+                <div className="mt-4">
+                    {!selectedCategory ? (
+                        <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
+                            {categories
+                                ?.filter((item: Category) => item.type === "expense")
+                                .map((item: Category, index: number) => (
+                                    <div
+                                        key={index}
+                                        className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${
+                                            selectedCategory === item._id ? "border-2 border-blue-500" : ""
+                                        }`}
+                                        onClick={() => setValue("category", item._id)}
+                                    >
+                                        <div
+                                            className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl ${
+                                                index % 2 === 0 ? "bg-green-500" : "bg-yellow-500"
+                                            }`}
+                                        >
+                                            <MdDirectionsBus />
+                                        </div>
+                                        <span className="mt-2 text-center">{item.name}</span>
                                     </div>
-                                    <span className="mt-2 text-center">{item.name}</span>
-                                </div>
-                            ))
+                                ))}
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
+                            <span className="text-gray-700 font-medium">
+                                {categories?.find((item: Category) => item._id === selectedCategory)?.name}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setValue("category", "")}
+                                className="text-gray font-semibold"
+                            >
+                                <FiEdit className="inline-block mr-1" />
+                            </button>
+                        </div>
+                    )}
+                    {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
+                </div>
+
+                {/* Amount Input */}
+                <div className="mt-6">
+                    <label className="text-gray-700 font-medium">ပမာဏ</label>
+                    <input
+                        type="number"
+                        placeholder="Enter amount"
+                        {...register("amount")}
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                    />
+                    {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount.message}</p>}
+                </div>
+
+                {/* Note Input */}
+                <div className="mt-6">
+                    <label className="text-gray-700 font-medium">မှတ်စု</label>
+                    <textarea
+                        placeholder="Enter note"
+                        rows={4}
+                        {...register("note")}
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                    ></textarea>
+                    {errors.note && <p className="text-red-500 text-sm mt-1">{errors.note.message}</p>}
+                </div>
+
+                {/* Date Input */}
+                <div className="mt-6">
+                    <label className="text-gray-700 font-medium">နေ့ ရက်</label>
+                    <input
+                        type="date"
+                        {...register("date")}
+                        value={new Date(selectedDate).toISOString().split('T')[0]}
+                        required
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                    />
+                    {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-6 space-y-3">
+                    <button
+                        type="submit"
+                        disabled={
+                            updateMutation.status === 'pending' ||
+                            !selectedCategory ||
+                            !watch("amount") ||
+                            !watch("date")
                         }
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
-                        <span className="text-gray-700 font-medium">
-                            {categories.find(item => item._id === selectedCategory)?.name}
-                        </span>
-                        <button
-                            onClick={() => setSelectedCategory(null)}
-                            className="text-gray font-semibold"
-                        >
-                            <FiEdit className="inline-block mr-1" />
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            {/* Amount Input */}
-            <div className="w-full px-6 mt-6">
-                <label className="text-gray-700 font-medium">ပမာဏ</label>
-                <input
-                    type="number"
-                    placeholder="Enter amount"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
-                />
-            </div>
-
-            {/* Note Input */}
-            <div className="w-full px-6 mt-6">
-                <label className="text-gray-700 font-medium">မှတ်စု</label>
-                <textarea
-                    placeholder="Enter note"
-                    rows={4}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
-                ></textarea>
-            </div>
-
-            {/* Date Input */}
-            <div className="w-full px-6 mt-6">
-                <label className="text-gray-700 font-medium">နေ့ ရက်</label>
-                <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
-                />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-6 w-full px-6 space-y-3">
-                <button
-                    disabled={loading}
-                    onClick={handleSubmit}
-                    className={`w-full bg-blue-500 text-white py-3 rounded-full font-semibold ${
-                        loading ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                >
-                    {loading ? "လုပ်ဆောင်ဆဲ..." : "အတည်ပြုမည်"}
-                </button>
-                <Link
-                    href="/"
-                    className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold text-center block"
-                >
-                    ပယ်ဖျက်မည်
-                </Link>
-            </div>
+                        className={`w-full bg-blue-500 text-white py-3 rounded-full font-semibold ${
+                            updateMutation.status === 'pending' ||
+                            !selectedCategory ||
+                            !watch("amount") ||
+                            !watch("date") ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                    >
+                        {updateMutation.status === 'pending' ? "လုပ်ဆောင်ဆဲ..." : "အတည်ပြုမည်"}
+                    </button>
+                    <Link
+                        href="/"
+                        className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold text-center block"
+                    >
+                        ပယ်ဖျက်မည်
+                    </Link>
+                </div>
+            </form>
         </div>
     );
 }

@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Link from "next/link";
 import { HiChevronLeft } from "react-icons/hi";
-import { FaDownload, FaFilter } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
+import { LiaFilterSolid } from "react-icons/lia";
 import registerMyanmarFont from "../NotoSansMyanmar-Regular.js"; // Adjust the path as necessary
+import apiClient from "@/utils/apiMiddleware";
+import { useQuery } from "@tanstack/react-query";
 
 interface Transaction {
     id: string;
@@ -17,56 +19,53 @@ interface Transaction {
 }
 
 export default function SummaryPage() {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-    const [filterYear, setFilterYear] = useState(new Date().getFullYear());
-    const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1);
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [filter, setFilter] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0].slice(0, 7));
+    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<string>("month");
+    const [filter, setFilter] = useState<boolean>(false);
+    const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("my-MM", {month: "long", year: "numeric"}));
 
-    useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
-                if (!token) {
-                    throw new Error("No token found. Please log in.");
-                }
-
-                // Fetch transactions with the token in the Authorization header
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/transactions`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Pass the token
-                    },
-                });
-
-                if (Array.isArray(response.data)) {
-                    setTransactions(response.data);
-                } else {
-                    console.error("Invalid response format:", response.data);
-                }
-            } catch (error) {
-                console.error("Error fetching transaction data:", error);
-            }
-        };
-
-        fetchTransactions();
-    }, []);
+    // Fetch transactions using React Query
+    const { data: transactions = [], isLoading, error } = useQuery<Transaction[]>({
+        queryKey: ["transactions"], // Query key
+        queryFn: async () => {
+            const response = await apiClient.get("/transactions");
+            return response.data;
+        },
+    });
 
     useEffect(() => {
         // Filter transactions by year and month
         const filtered = transactions.filter((transaction) => {
             const transactionDate = new Date(transaction.date);
-            return (
-                transactionDate.getFullYear() === filterYear &&
-                transactionDate.getMonth() + 1 === filterMonth
-            );
+            const filterYear = parseInt(selectedDate.split("-")[0]);
+            const filterMonth = parseInt(selectedDate.split("-")[1]);
+
+            if (activeTab === "year") {
+                return transactionDate.getFullYear() === filterYear;
+            } else if (activeTab === "month") {
+                return (
+                    transactionDate.getFullYear() === filterYear &&
+                    transactionDate.getMonth() + 1 === filterMonth
+                );
+            }
         });
         setFilteredTransactions(filtered);
-    }, [transactions, filterYear, filterMonth]);
+    }, [transactions, filter]);
 
     const totalAmount = filteredTransactions.reduce((sum, transaction) => {
         return sum + (transaction.type === "income" ? transaction.amount : -transaction.amount);
     }, 0);
+
+    const changeTabHandler = (tab: string) => () => {
+        setActiveTab(tab);
+        if (tab === "month") {
+            setSelectedDate(new Date().toISOString().split("T")[0].slice(0, 7)); // Reset selected date to current month
+        } else if (tab === "year") {
+            setSelectedDate(`${new Date().getFullYear()}-01`); // Reset selected date to current year
+        }
+    };
 
     const handleDownloadPDF = async () => {
         const jsPDF = (await import("jspdf")).default;
@@ -79,7 +78,7 @@ export default function SummaryPage() {
 
         doc.setFont("helvetica");
         doc.setFontSize(14);
-        doc.text(`${new Date(filterYear, filterMonth - 1).toLocaleDateString("my-MM", {
+        doc.text(`${new Date(selectedDate).toLocaleDateString("my-MM", {
             day: "2-digit",
             month: "long",
             year: "numeric",
@@ -132,7 +131,7 @@ export default function SummaryPage() {
         );
 
         // Save PDF
-        doc.save(`transactions_${filterYear}_${filterMonth}.pdf`);
+        doc.save(`transactions_${selectedDate}.pdf`);
     };
 
     return (
@@ -147,91 +146,76 @@ export default function SummaryPage() {
                     <h1 className="text-lg font-semibold">စာရင်းချုပ်</h1>
 
                     <div className="relative">
-                        <FaFilter
-                            className="text-xl cursor-pointer"
+                        <LiaFilterSolid
+                            className="text-xl cursor-pointer size-6 text-white"
                             onClick={() => setShowDatePicker(!showDatePicker)}
                         />
 
                         {showDatePicker && (
-                        <div className="absolute right-0 mt-2 w-72 rounded-md bg-white p-4 shadow-lg z-20 text-black">
-                            <div className="relative mb-4">
+                            <div className="absolute right-0 mt-2 w-72 rounded-md bg-white p-4 shadow-lg z-20 text-black">
+                                <div className="relative mb-8">
+                                    <button
+                                        onClick={() => setShowDatePicker(false)}
+                                        className="absolute top-0 right-0 bold font-semibold hover:text-gray-700 focus:outline-none"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div className="flex justify-between mb-4 bg-blue-100 rounded-lg overflow-hidden">
+                                    {["month", "year"].map((tab) => (
+                                        <button
+                                            key={tab}
+                                            onClick={changeTabHandler(tab)}
+                                            className={`flex-1 py-2 text-sm font-medium uppercase ${
+                                                activeTab === tab ? "bg-blue-500 text-white" : "text-blue-700"
+                                            }`}
+                                        >
+                                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Date display and filter */}
+                                <div className="relative mb-4">
+                                    {activeTab === "month" ? (
+                                        <input
+                                            type="month"
+                                            required
+                                            value={selectedDate} // Controlled input
+                                            className="w-full border border-blue-300 rounded-md px-4 py-2 text-center text-blue-700 focus:outline-none mb-4"
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                        />
+                                    ) : (
+                                        <input
+                                            type="number"
+                                            required
+                                            min="1900"
+                                            max="2100"
+                                            value={parseInt(selectedDate.split("-")[0]) || new Date().getFullYear()} // Controlled input
+                                            className="w-full border border-blue-300 rounded-md px-4 py-2 text-center text-blue-700 focus:outline-none mb-4"
+                                            onChange={(e) => setSelectedDate(`${e.target.value}-01`)} // Update `selectedDate` with a valid year
+                                        />
+                                    )}
+                                </div>
+
                                 <button
-                                    onClick={() => setShowDatePicker(false)}
-                                    className="absolute top-0 right-0 bold font-semibold hover:text-gray-700 focus:outline-none"
+                                    onClick={() => {
+                                        setShowDatePicker(!showDatePicker);
+                                        setFilter(!filter);
+                                        if (activeTab === "month") {
+                                            setShowDateData(new Date(selectedDate).toLocaleString("my-MM", {
+                                                month: "long",
+                                                year: "numeric",
+                                            }));
+                                        } else if (activeTab === "year") {
+                                            setShowDateData(selectedDate.split("-")[0]);
+                                        }
+                                    }}
+                                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md"
                                 >
-                                    ✕
+                                    Filter
                                 </button>
                             </div>
-                            <div className="space-y-4">
-                                {/* Year Selector */}
-                                <div>
-                                    <label className="block font-semibold mb-1">Year</label>
-                                    <select
-                                        value={filterYear}
-                                        onChange={(e) => setFilterYear(Number(e.target.value))}
-                                        className="w-full rounded border-gray-300 text-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        {Array.from({ length: 10 }, (_, i) => {
-                                            const year = new Date().getFullYear() - i;
-                                            return (
-                                                <option key={year} value={year}>
-                                                    {year}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
-
-                                {/* Month Selector */}
-                                <div>
-                                    <label className="block font-semibold mb-1">Month</label>
-                                    <select
-                                        value={filterMonth}
-                                        onChange={(e) => setFilterMonth(Number(e.target.value))}
-                                        className="w-full rounded border-gray-300 text-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        {Array.from({ length: 12 }, (_, i) => (
-                                            <option key={i + 1} value={i + 1}>
-                                                {new Date(0, i).toLocaleString("default", { month: "long" })}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                {/* Apply Filter Button */}
-                                <div className="flex justify-end space-x-2">
-                                    <button
-                                        onClick={() => {
-                                            setFilteredTransactions(transactions);
-                                            setShowDatePicker(false);
-                                        }}
-                                        className="bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                    >
-                                        All
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setFilterYear(new Date().getFullYear());
-                                            setFilterMonth(new Date().getMonth() + 1);
-                                            setFilter(!filter);
-                                            setShowDatePicker(false);
-                                        }}
-                                        className="bg-gray-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                                    >
-                                        Current
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setFilter(!filter);
-                                            setShowDatePicker(!showDatePicker);
-                                        }}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    >
-                                        Filter
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                         )}
                     </div>
                 </div>
@@ -247,7 +231,7 @@ export default function SummaryPage() {
                     <div>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-semibold text-gray-700">
-                                {new Date(filterYear, filterMonth - 1).toLocaleString("default", { month: "long" })} {filterYear}
+                                {showDateData} စာရင်းချုပ်
                             </h2>
                             <FaDownload
                                 title="Download PDF"

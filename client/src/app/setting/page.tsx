@@ -15,6 +15,7 @@ export default function SettingPage() {
     async function handleLogout() {
         try {
             await signOut(auth); // Sign out the user
+            localStorage.removeItem("authToken"); // Remove user data from local storage
             router.push("/login"); // Redirect to the login page
             console.log("User logged out");
         } catch (err) {
