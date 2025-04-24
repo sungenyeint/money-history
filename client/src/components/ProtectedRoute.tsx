@@ -21,7 +21,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         ) : (
             <>
                 {children}
-                <Footer /> {/* Render Footer component */}
+                {user && <Footer />}
             </>
         )
     );
