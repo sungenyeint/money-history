@@ -39,7 +39,7 @@ export default function EditIncome() {
     const selectedDate = watch("date")?.toString() || new Date().toISOString().split("T")[0]; // Default to today if not set
 
     // Fetch transaction and categories using React Query
-    const { data: categories, isLoading: isFetching, error: fetchError } = useQuery({
+    const { data: categories, error: fetchError } = useQuery({
         queryKey: ["transaction", id],
         queryFn: async () => {
             // Fetch transaction details

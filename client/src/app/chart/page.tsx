@@ -10,6 +10,7 @@ import {
     ArcElement,
     Tooltip,
     Legend,
+    TooltipItem,
 } from "chart.js";
 import apiClient from "@/utils/apiMiddleware";
 import { useQuery } from "@tanstack/react-query";
@@ -45,7 +46,7 @@ export default function ChartPage() {
     const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("my-MM", {month: "long", year: "numeric"}));
 
     // Fetch transactions using React Query
-    const { data: transactions = [], isLoading, error } = useQuery<Transaction[]>({
+    const { data: transactions = [] } = useQuery<Transaction[]>({
         queryKey: ["transactions"], // Query key
         queryFn: async () => {
             const response = await apiClient.get("/transactions");
@@ -160,7 +161,7 @@ export default function ChartPage() {
             },
             tooltip: {
                 callbacks: {
-                    label: function (context: any) {
+                    label: function (context: TooltipItem<'doughnut'>) {
                         const label = context.label || "";
                         const value = context.raw || 0;
                         return `${label}: ${value}`;

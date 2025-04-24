@@ -27,7 +27,7 @@ export default function SummaryPage() {
     const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("my-MM", {month: "long", year: "numeric"}));
 
     // Fetch transactions using React Query
-    const { data: transactions = [], isLoading, error } = useQuery<Transaction[]>({
+    const { data: transactions = [] } = useQuery<Transaction[]>({
         queryKey: ["transactions"], // Query key
         queryFn: async () => {
             const response = await apiClient.get("/transactions");

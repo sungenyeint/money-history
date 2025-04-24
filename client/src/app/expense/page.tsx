@@ -37,7 +37,7 @@ export default function Expense() {
     const selectedCategory = watch("category");
 
     // Fetch categories using React Query
-    const { data: categories = [], isLoading: isCategoriesLoading, error: categoriesError } = useQuery<Category[]>({
+    const { data: categories = [], error: categoriesError } = useQuery<Category[]>({
         queryKey: ["categories"],
         queryFn: async () => {
             const response = await apiClient.get("/categories");
