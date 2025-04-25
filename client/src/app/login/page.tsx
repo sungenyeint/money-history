@@ -86,7 +86,7 @@ export default function Login() {
     return loading ? (
         <Loading />
     ) : (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen bg-white flex flex-col">
             <div className="mx-4 mt-40 p-6">
                 <h1 className="text-3xl font-bold text-center mb-6">Money History</h1>
                 <p className="text-center text-gray-600 mb-4">Log in to your account</p>

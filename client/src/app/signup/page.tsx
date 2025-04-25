@@ -36,7 +36,7 @@ export default function SignUp() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col justify-center items-center">
+        <div className="min-h-screen bg-white flex flex-col justify-center items-center">
             <div className="w-full max-w-md p-6">
                 <h1 className="text-2xl font-bold text-center mb-6">Create an Account</h1>
 
