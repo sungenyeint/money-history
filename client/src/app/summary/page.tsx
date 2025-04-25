@@ -24,7 +24,7 @@ export default function SummaryPage() {
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>("month");
     const [filter, setFilter] = useState<boolean>(false);
-    const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("my-MM", {month: "long", year: "numeric"}));
+    const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("en-US", {month: "long", year: "numeric"}));
 
     // Fetch transactions using React Query
     const { data: transactions = [] } = useQuery<Transaction[]>({

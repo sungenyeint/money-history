@@ -43,7 +43,7 @@ export default function ChartPage() {
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<string>("month");
     const [filter, setFilter] = useState<boolean>(false);
-    const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("my-MM", {month: "long", year: "numeric"}));
+    const [showDateData, setShowDateData] = useState<string>(new Date().toLocaleString("en-US", {month: "long", year: "numeric"}));
 
     // Fetch transactions using React Query
     const { data: transactions = [] } = useQuery<Transaction[]>({
@@ -273,7 +273,7 @@ export default function ChartPage() {
                     {incomeChartData.labels.length === 0 || (
                         <div className="w-full px-6 mt-6">
                             <Doughnut data={incomeChartData} options={chartOptions} />
-                            <h2 className="text-center text-lg font-semibold text-gray-700 mb-4">
+                            <h2 className="text-center text-lg font-semibold text-gray-700 mt-2 mb-4">
                                 ၀င်ငွေပြ Chart
                             </h2>
                         </div>
@@ -282,7 +282,7 @@ export default function ChartPage() {
                     {expenseChartData.labels.length === 0 || (
                         <div className="w-full px-6 mt-6">
                             <Doughnut data={expenseChartData} options={chartOptions} />
-                            <h2 className="text-center text-lg font-semibold text-gray-700 mb-4">
+                            <h2 className="text-center text-lg font-semibold text-gray-700 mt-2 mb-4">
                                 ထွက်ငွေပြ Chart
                             </h2>
                         </div>

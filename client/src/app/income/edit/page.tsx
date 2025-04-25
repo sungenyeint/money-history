@@ -120,7 +120,7 @@ export default function EditIncome() {
             {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="w-full px-6 pb-6 mt-4">
                 {/* Category Selection */}
-                <div className="text-black-700 font-medium text-base">အမျိုးအစားရွေးရန်</div>
+                <div className="text-black font-medium text-base">အမျိုးအစားရွေးရန်</div>
                 <div className="mt-4">
                     {!selectedCategory ? (
                         <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
@@ -129,7 +129,7 @@ export default function EditIncome() {
                                 .map((item: Category, index: number) => (
                                     <div
                                         key={index}
-                                        className={`flex flex-col items-center text-sm text-black-700 cursor-pointer ${
+                                        className={`flex flex-col items-center text-sm text-black cursor-pointer ${
                                             selectedCategory === item._id ? "border-2 border-blue-500" : ""
                                         }`}
                                         onClick={() => setValue("category", item._id)}
@@ -147,7 +147,7 @@ export default function EditIncome() {
                         </div>
                     ) : (
                         <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
-                            <span className="text-black-700 font-medium">
+                            <span className="text-black font-medium">
                                 {categories?.find((item: Category) => item._id === selectedCategory)?.name}
                             </span>
                             <button
@@ -164,7 +164,7 @@ export default function EditIncome() {
 
                 {/* Amount Input */}
                 <div className="mt-6">
-                    <label className="text-black-700 font-medium">ပမာဏ</label>
+                    <label className="text-black font-medium">ပမာဏ</label>
                     <input
                         type="number"
                         placeholder="Enter amount"
@@ -176,7 +176,7 @@ export default function EditIncome() {
 
                 {/* Note Input */}
                 <div className="mt-6">
-                    <label className="text-black-700 font-medium">မှတ်စု</label>
+                    <label className="text-black font-medium">မှတ်စု</label>
                     <textarea
                         placeholder="Enter note"
                         rows={4}
@@ -188,7 +188,7 @@ export default function EditIncome() {
 
                 {/* Date Input */}
                 <div className="mt-6">
-                    <label className="text-black-700 font-medium">နေ့ ရက်</label>
+                    <label className="text-black font-medium">နေ့ ရက်</label>
                     <input
                         type="date"
                         {...register("date")}
