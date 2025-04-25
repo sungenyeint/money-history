@@ -106,7 +106,7 @@ export default function Login() {
                         } rounded-md p-3`}
                     />
                     {errors.email && (
-                        <p className="text-red-500 text-sm mt-1 mb-3">{errors.email.message}</p>
+                        <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
                     )}
 
                     <input
@@ -115,15 +115,15 @@ export default function Login() {
                         {...register("password")}
                         className={`w-full border ${
                             errors.password ? "border-red-500" : "border-gray-300"
-                        } rounded-md p-3`}
+                        } rounded-md p-3 mt-4`}
                     />
                     {errors.password && (
-                        <p className="text-red-500 text-sm mt-1 mb-3">{errors.password.message}</p>
+                        <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
                     )}
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-400 hover:bg-blue-700 text-white py-3 mt-2"
+                        className="w-full bg-blue-400 hover:bg-blue-700 text-white py-3 mt-4"
                     >
                         Log in
                     </button>
