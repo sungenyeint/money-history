@@ -21,7 +21,7 @@ type FormData = Yup.InferType<typeof transactionValidationSchema>;
 
 export default function EditIncome() {
     const searchParams = useSearchParams();
-    const id = searchParams.get("id"); // Get the "id" from the query string
+    const id = searchParams?.get("id") || ""; // Get the "id" from the query string or default to an empty string
     const router = useRouter();
 
     // React Hook Form setup
