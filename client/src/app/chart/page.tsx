@@ -243,7 +243,7 @@ export default function ChartPage() {
                                         setShowDatePicker(!showDatePicker);
                                         setFilter(!filter);
                                         if (activeTab === "month") {
-                                            setShowDateData(new Date(selectedDate).toLocaleString("my-MM", {
+                                            setShowDateData(new Date(selectedDate).toLocaleString("en-US", {
                                                 month: "long",
                                                 year: "numeric",
                                             }));

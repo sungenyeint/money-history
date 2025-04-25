@@ -80,9 +80,9 @@ export default function Income() {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="w-full px-6 mt-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-full px-6 pb-6 mt-4">
                 {/* Category Selection */}
-                <div className="text-gray-700 font-medium text-base">အမျိုးအစားရွေးရန်</div>
+                <div className="text-black-700 font-medium text-base">အမျိုးအစားရွေးရန်</div>
                 <div className="mt-4">
                     {!selectedCategory ? (
                         <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
@@ -91,7 +91,7 @@ export default function Income() {
                                 .map((item, index) => (
                                     <div
                                         key={index}
-                                        className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${
+                                        className={`flex flex-col items-center text-sm text-black-700 cursor-pointer ${
                                             selectedCategory === item._id ? "border-2 border-blue-500" : ""
                                         }`}
                                         onClick={() => setValue("category", item._id)}
@@ -109,13 +109,13 @@ export default function Income() {
                         </div>
                     ) : (
                         <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
-                            <span className="text-gray-700 font-medium">
+                            <span className="text-black-700 font-medium">
                                 {categories.find((item) => item._id === selectedCategory)?.name}
                             </span>
                             <button
                                 type="button"
                                 onClick={() => setValue("category", "")}
-                                className="text-gray font-semibold"
+                                className="text-black font-semibold"
                             >
                                 <FiEdit className="inline-block mr-1" />
                             </button>
@@ -126,40 +126,40 @@ export default function Income() {
 
                 {/* Amount Input */}
                 <div className="mt-6">
-                    <label className="text-gray-700 font-medium">ပမာဏ</label>
+                    <label className="text-black-700 font-medium">ပမာဏ</label>
                     <input
                         type="number"
                         placeholder="Enter amount"
                         {...register("amount")}
                         required
                         min={1}
-                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-black"
                     />
                     {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount.message}</p>}
                 </div>
 
                 {/* Notes Input */}
                 <div className="mt-6">
-                    <label className="text-gray font-medium">မှတ်စု</label>
+                    <label className="text-black font-medium">မှတ်စု</label>
                     <textarea
                         placeholder="Enter Notes"
                         rows={4}
                         maxLength={200}
                         {...register("note")}
-                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-black"
                     ></textarea>
                     {errors.note && <p className="text-red-500 text-sm mt-1">{errors.note.message}</p>}
                 </div>
 
                 {/* Date Picker */}
                 <div className="mt-6">
-                    <label className="text-gray-700 font-medium">နေ့ ရက်</label>
+                    <label className="text-black-700 font-medium">နေ့ ရက်</label>
                     <input
                         type="date"
                         {...register("date")}
                         required
                         defaultValue={new Date().toISOString().split("T")[0]}
-                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-black"
                     />
                     {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
                 </div>
@@ -191,7 +191,7 @@ export default function Income() {
                             setValue("note", "");
                             setValue("date", new Date());
                         }}
-                        className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold"
+                        className="w-full border border-blue-500 text-black py-3 rounded-full font-semibold"
                     >
                         ပယ်ဖျက်မည်
                     </button>

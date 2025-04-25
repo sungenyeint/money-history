@@ -5,7 +5,8 @@ exports.getAll = async (req, res) => {
   try {
     const userId = req.user.uid; // Extract userId from the authenticated user
     const items = await TransactionService.getAll(userId); // Pass userId to the service
-    res.json(items);
+    const sortedItems = items.sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date ascending
+    res.json(sortedItems);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

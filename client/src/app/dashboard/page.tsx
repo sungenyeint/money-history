@@ -194,7 +194,7 @@ export default function Dashboard() {
                                     } rounded-xl shadow-lg p-4 hover:shadow-xl transition cursor-pointer`}
                                 >
                                     <p className="text-gray-600 text-sm mb-1">
-                                        {new Date(transaction.date).toLocaleDateString("my-MM", {
+                                        {new Date(transaction.date).toLocaleDateString("en-US", {
                                             day: "2-digit",
                                             month: "long",
                                             year: "numeric",

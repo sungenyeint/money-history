@@ -78,25 +78,26 @@ export default function SummaryPage() {
 
         doc.setFont("helvetica");
         doc.setFontSize(14);
-        doc.text(`${new Date(selectedDate).toLocaleDateString("my-MM", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-        })} for transactions Summary`, 10, 15);
+        if (activeTab === "month") {
+            doc.text(`Monthly Report [ ${new Date(selectedDate).toLocaleString("en-US", { month: "long", year: "numeric" })} ]`, 10, 15);
+        } else if (activeTab === "year") {
+            doc.text(`Yearly Report [ ${selectedDate.split("-")[0]} ]`, 10, 15);
+        }
         doc.setFontSize(10);
         doc.text(`Download Date: ${new Date().toLocaleDateString()}`, 10, 25);
 
         // Table Header
         let y = 40;
-        doc.setFontSize(11);
+        doc.setFontSize(12);
+        doc.setFillColor(233, 233, 233); // Brown background color
+        doc.rect(8, y -6 , 120, 10, "F"); // Draw filled rectangle for header background
         doc.text("Date", 10, y);
-        doc.text("Type", 40, y);
-        doc.text("Category", 80, y);
-        doc.text("Amount", 150, y, { align: "right" });
+        doc.text("Category", 50, y);
+        doc.text("Amount", 120, y, { align: "right" });
 
         y += 6;
         doc.setLineWidth(0.1);
-        doc.line(10, y, 200, y); // underline
+        // doc.line(10, y, 130, y); // underline
 
         y += 6;
 
@@ -108,24 +109,28 @@ export default function SummaryPage() {
             }
 
             doc.text(new Date(tx.date).toLocaleDateString(), 10, y);
-            doc.text(tx.type === "income" ? "Income" : "Expense", 40, y);
             doc.setFont("NotoSansMyanmar", "normal");
-            doc.text(tx.category?.name || "အမည်မသိ", 80, y);
+            doc.text(tx.category?.name || "အမည်မသိ", 50, y);
             doc.setFont("helvetica");
+            doc.setTextColor(tx.type === "income" ? 0 : 255, tx.type === "income" ? 128 : 0, 0); // Green for income, Red for expense
             doc.text(
                 `${tx.type === "income" ? "+ " : "- "}${Number(tx.amount).toLocaleString()}`,
-                150,
+                120,
                 y,
                 { align: "right" }
             );
+            doc.setTextColor(0, 0, 0); // Reset to black
             y += 8;
+            doc.line(10, y - 5, 130, y - 5); // underline
         });
 
-        doc.line(10, y, 200, y); // underline
+        // doc.line(10, y, 130, y); // underline
         y += 6;
+        doc.setFillColor(233, 233, 233); // Brown background color
+        doc.rect(8, y -6 , 120, 10, "F");
         doc.text(
             `Total Amount: ${totalAmount >= 0 ? "+ " : "- "}${Math.abs(totalAmount).toLocaleString()} MMK`,
-            150,
+            120,
             y,
             { align: "right" }
         );
@@ -203,7 +208,7 @@ export default function SummaryPage() {
                                         setShowDatePicker(!showDatePicker);
                                         setFilter(!filter);
                                         if (activeTab === "month") {
-                                            setShowDateData(new Date(selectedDate).toLocaleString("my-MM", {
+                                            setShowDateData(new Date(selectedDate).toLocaleString("en-US", {
                                                 month: "long",
                                                 year: "numeric",
                                             }));

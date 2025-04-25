@@ -118,9 +118,9 @@ export default function EditExpense() {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="w-full px-6 mt-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-full px-6 pb-6 mt-4">
                 {/* Category Selection */}
-                <div className="text-gray-700 font-medium text-base">အမျိုးအစားရွေးရန်</div>
+                <div className="text-black-700 font-medium text-base">အမျိုးအစားရွေးရန်</div>
                 <div className="mt-4">
                     {!selectedCategory ? (
                         <div className="bg-white rounded-xl shadow-md p-4 grid grid-cols-3 gap-4 max-h-48 overflow-y-auto">
@@ -129,7 +129,7 @@ export default function EditExpense() {
                                 .map((item: Category, index: number) => (
                                     <div
                                         key={index}
-                                        className={`flex flex-col items-center text-sm text-gray-700 cursor-pointer ${
+                                        className={`flex flex-col items-center text-sm text-black-700 cursor-pointer ${
                                             selectedCategory === item._id ? "border-2 border-blue-500" : ""
                                         }`}
                                         onClick={() => setValue("category", item._id)}
@@ -147,13 +147,13 @@ export default function EditExpense() {
                         </div>
                     ) : (
                         <div className="flex items-center justify-between bg-blue-50 p-4 rounded-md">
-                            <span className="text-gray-700 font-medium">
+                            <span className="text-black-700 font-medium">
                                 {categories?.find((item: Category) => item._id === selectedCategory)?.name}
                             </span>
                             <button
                                 type="button"
                                 onClick={() => setValue("category", "")}
-                                className="text-gray font-semibold"
+                                className="text-black font-semibold"
                             >
                                 <FiEdit className="inline-block mr-1" />
                             </button>
@@ -164,37 +164,37 @@ export default function EditExpense() {
 
                 {/* Amount Input */}
                 <div className="mt-6">
-                    <label className="text-gray-700 font-medium">ပမာဏ</label>
+                    <label className="text-black-700 font-medium">ပမာဏ</label>
                     <input
                         type="number"
                         placeholder="Enter amount"
                         {...register("amount")}
-                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-black"
                     />
                     {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount.message}</p>}
                 </div>
 
                 {/* Note Input */}
                 <div className="mt-6">
-                    <label className="text-gray-700 font-medium">မှတ်စု</label>
+                    <label className="text-black-700 font-medium">မှတ်စု</label>
                     <textarea
                         placeholder="Enter note"
                         rows={4}
                         {...register("note")}
-                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-black"
                     ></textarea>
                     {errors.note && <p className="text-red-500 text-sm mt-1">{errors.note.message}</p>}
                 </div>
 
                 {/* Date Input */}
                 <div className="mt-6">
-                    <label className="text-gray-700 font-medium">နေ့ ရက်</label>
+                    <label className="text-black-700 font-medium">နေ့ ရက်</label>
                     <input
                         type="date"
                         {...register("date")}
                         value={new Date(selectedDate).toISOString().split('T')[0]}
                         required
-                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-gray"
+                        className="w-full mt-2 p-2 rounded-md bg-blue-50 text-black"
                     />
                     {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
                 </div>
@@ -220,7 +220,7 @@ export default function EditExpense() {
                     </button>
                     <Link
                         href="/"
-                        className="w-full border border-blue-500 text-gray py-3 rounded-full font-semibold text-center block"
+                        className="w-full border border-blue-500 text-black py-3 rounded-full font-semibold text-center block"
                     >
                         ပယ်ဖျက်မည်
                     </Link>
