@@ -20,8 +20,6 @@ Thumbs.db
 # Build outputs
 client/.next/
 client/out/
-client/public/sw.js
-client/public/workbox-*.js
 server/dist/
 
 # IDEs
