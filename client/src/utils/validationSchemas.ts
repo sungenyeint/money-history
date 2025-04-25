@@ -23,3 +23,13 @@ export const signUpValidationSchema = Yup.object().shape({
         .oneOf([Yup.ref("password"), undefined], "စကားဝှက်နှစ်ခု မတူညီပါ။")
         .required("စကားဝှက် အတည်ပြုရန် လိုအပ်သည်။"),
 });
+
+export const loginValidationScheme = Yup.object().shape({
+    email: Yup.string()
+        .email("အီးမေးလ်လိပ်စာသည် မှန်ကန်ရမည်။")
+        .required("အီးမေးလ် ဖြည့်ရန် လိုအပ်သည်။"),
+
+    password: Yup.string()
+        .min(6, "စကားဝှက်သည် အနည်းဆုံး စာလုံး ၆ လုံးရှိရမည်။")
+        .required("စကားဝှက် ဖြည့်ရန် လိုအပ်သည်။"),
+});

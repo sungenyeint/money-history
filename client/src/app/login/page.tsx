@@ -1,20 +1,35 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
 import { auth, googleProvider, facebookProvider } from "@/utils/firebase";
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AiFillFacebook } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import Loading from "@/components/Loading";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { loginValidationScheme } from "@/utils/validationSchemas";
+
+interface LoginFormData {
+    email: string;
+    password: string;
+}
 
 export default function Login() {
     const { user, loading } = useAuth();
     const [error, setError] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const router = useRouter();
+
+    // React Hook Form setup
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginFormData>({
+        resolver: yupResolver(loginValidationScheme),
+    });
 
     // Redirect logged-in users to the dashboard
     useEffect(() => {
@@ -53,11 +68,9 @@ export default function Login() {
         }
     };
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleEmailLogin = async (data: LoginFormData) => {
         try {
-            const result = await signInWithEmailAndPassword(auth, email, password);
-            console.log(result);
+            const result = await signInWithEmailAndPassword(auth, data.email, data.password);
             const token = await result.user.getIdToken();
             localStorage.setItem("authToken", token);
             router.push("/dashboard");
@@ -70,15 +83,6 @@ export default function Login() {
         }
     };
 
-    const handleSignUp = async () => {
-        try {
-            const result = await createUserWithEmailAndPassword(auth, email, password);
-            console.log("User created:", result.user);
-        } catch (err) {
-            console.error("Sign Up Error:", err);
-        }
-    };
-
     return loading ? (
         <Loading />
     ) : (
@@ -88,26 +92,38 @@ export default function Login() {
                 <p className="text-center text-gray-600 mb-4">Log in to your account</p>
 
                 {/* Email and Password Login */}
-                <form onSubmit={handleEmailLogin} className="mb-6" autoComplete="off">
+                <form
+                    onSubmit={handleSubmit(handleEmailLogin)}
+                    className="mb-6"
+                    autoComplete="off"
+                >
                     <input
                         type="email"
                         placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md p-3 mb-4"
-                        required
+                        {...register("email")}
+                        className={`w-full border ${
+                            errors.email ? "border-red-500" : "border-gray-300"
+                        } rounded-md p-3`}
                     />
+                    {errors.email && (
+                        <p className="text-red-500 text-sm mt-1 mb-3">{errors.email.message}</p>
+                    )}
+
                     <input
                         type="password"
                         placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md p-3 mb-4"
-                        required
+                        {...register("password")}
+                        className={`w-full border ${
+                            errors.password ? "border-red-500" : "border-gray-300"
+                        } rounded-md p-3`}
                     />
+                    {errors.password && (
+                        <p className="text-red-500 text-sm mt-1 mb-3">{errors.password.message}</p>
+                    )}
+
                     <button
                         type="submit"
-                        className="w-full bg-blue-400 hover:bg-blue-700 text-white py-3"
+                        className="w-full bg-blue-400 hover:bg-blue-700 text-white py-3 mt-2"
                     >
                         Log in
                     </button>
@@ -115,7 +131,7 @@ export default function Login() {
 
                 {/* Sign Up Link */}
                 <p className="text-center text-gray-600 my-6">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link
                         href="/signup"
                         className="text-blue-600 hover:underline font-semibold"
